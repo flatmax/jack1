@@ -1,0 +1,362 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="jack1" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="bin/Debug/jack1" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-g" />
+				</Compiler>
+			</Target>
+			<Target title="Release">
+				<Option output="bin/Release/jack1" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O2" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+		</Compiler>
+		<Unit filename="../AUTHORS" />
+		<Unit filename="../Makefile.am" />
+		<Unit filename="../README" />
+		<Unit filename="../README.developers" />
+		<Unit filename="../acinclude.m4" />
+		<Unit filename="../autogen.sh" />
+		<Unit filename="../config/Makefile.am" />
+		<Unit filename="../config/cpu/Makefile.am" />
+		<Unit filename="../config/cpu/alpha/Makefile.am" />
+		<Unit filename="../config/cpu/alpha/atomicity.h" />
+		<Unit filename="../config/cpu/alpha/cycles.h" />
+		<Unit filename="../config/cpu/cris/Makefile.am" />
+		<Unit filename="../config/cpu/cris/atomicity.h" />
+		<Unit filename="../config/cpu/generic/Makefile.am" />
+		<Unit filename="../config/cpu/generic/atomicity.h" />
+		<Unit filename="../config/cpu/generic/cycles.h" />
+		<Unit filename="../config/cpu/i386/Makefile.am" />
+		<Unit filename="../config/cpu/i386/atomicity.h" />
+		<Unit filename="../config/cpu/i386/cycles.h" />
+		<Unit filename="../config/cpu/i486/Makefile.am" />
+		<Unit filename="../config/cpu/i486/cycles.h" />
+		<Unit filename="../config/cpu/ia64/Makefile.am" />
+		<Unit filename="../config/cpu/ia64/atomicity.h" />
+		<Unit filename="../config/cpu/ia64/cycles.h" />
+		<Unit filename="../config/cpu/ia64/ia64intrin.h" />
+		<Unit filename="../config/cpu/m68k/Makefile.am" />
+		<Unit filename="../config/cpu/m68k/atomicity.h" />
+		<Unit filename="../config/cpu/mips/Makefile.am" />
+		<Unit filename="../config/cpu/mips/atomicity.h" />
+		<Unit filename="../config/cpu/powerpc/Makefile.am" />
+		<Unit filename="../config/cpu/powerpc/atomicity.h" />
+		<Unit filename="../config/cpu/powerpc/cycles.h" />
+		<Unit filename="../config/cpu/s390/Makefile.am" />
+		<Unit filename="../config/cpu/s390/atomicity.h" />
+		<Unit filename="../config/os/Makefile.am" />
+		<Unit filename="../config/os/generic/Makefile.am" />
+		<Unit filename="../config/os/generic/ipc.h" />
+		<Unit filename="../config/os/generic/poll.h" />
+		<Unit filename="../config/os/generic/sanitycheck.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../config/os/generic/time.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../config/os/generic/time.h" />
+		<Unit filename="../config/os/gnu-linux/Makefile.am" />
+		<Unit filename="../config/os/gnu-linux/sanitycheck.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../config/os/gnu-linux/systemtest.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../config/os/gnu-linux/time.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../config/os/gnu-linux/time.h" />
+		<Unit filename="../config/os/macosx/JACK_LOCATION.h" />
+		<Unit filename="../config/os/macosx/Makefile.am" />
+		<Unit filename="../config/os/macosx/README" />
+		<Unit filename="../config/os/macosx/getopt.h" />
+		<Unit filename="../config/os/macosx/ipc.h" />
+		<Unit filename="../config/os/macosx/mach_port.h" />
+		<Unit filename="../config/os/macosx/pThreadUtilities.h" />
+		<Unit filename="../config/os/macosx/poll.h" />
+		<Unit filename="../config/os/macosx/sanitycheck.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../config/os/macosx/time.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../config/os/macosx/time.h" />
+		<Unit filename="../config/sysdeps/Makefile.am" />
+		<Unit filename="../config/sysdeps/atomicity.h" />
+		<Unit filename="../config/sysdeps/cycles.h" />
+		<Unit filename="../config/sysdeps/getopt.h" />
+		<Unit filename="../config/sysdeps/ipc.h" />
+		<Unit filename="../config/sysdeps/mach_port.h" />
+		<Unit filename="../config/sysdeps/pThreadUtilities.h" />
+		<Unit filename="../config/sysdeps/poll.h" />
+		<Unit filename="../config/sysdeps/portaudio.h" />
+		<Unit filename="../config/sysdeps/sanitycheck.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../config/sysdeps/systemtest.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../config/sysdeps/time.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../config/sysdeps/time.h" />
+		<Unit filename="../configure.ac" />
+		<Unit filename="../drivers/Makefile.am" />
+		<Unit filename="../drivers/alsa/Makefile.am" />
+		<Unit filename="../drivers/alsa/alsa_driver.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../drivers/alsa/alsa_driver.h" />
+		<Unit filename="../drivers/alsa/generic.h" />
+		<Unit filename="../drivers/alsa/generic_hw.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../drivers/alsa/hammerfall.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../drivers/alsa/hammerfall.h" />
+		<Unit filename="../drivers/alsa/hdsp.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../drivers/alsa/hdsp.h" />
+		<Unit filename="../drivers/alsa/ice1712.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../drivers/alsa/ice1712.h" />
+		<Unit filename="../drivers/alsa/memops.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../drivers/alsa/usx2y.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../drivers/alsa/usx2y.h" />
+		<Unit filename="../drivers/alsa_midi/Makefile.am" />
+		<Unit filename="../drivers/alsa_midi/a2j.h" />
+		<Unit filename="../drivers/alsa_midi/alsa_midi.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../drivers/alsa_midi/alsa_midi_driver.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../drivers/alsa_midi/list.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../drivers/alsa_midi/list.h" />
+		<Unit filename="../drivers/alsa_midi/midi_pack.h" />
+		<Unit filename="../drivers/alsa_midi/midi_unpack.h" />
+		<Unit filename="../drivers/alsa_midi/port.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../drivers/alsa_midi/port.h" />
+		<Unit filename="../drivers/alsa_midi/port_hash.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../drivers/alsa_midi/port_hash.h" />
+		<Unit filename="../drivers/alsa_midi/port_thread.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../drivers/alsa_midi/port_thread.h" />
+		<Unit filename="../drivers/am/Makefile.am" />
+		<Unit filename="../drivers/am/alsa_midi.h" />
+		<Unit filename="../drivers/am/alsa_midi_driver.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../drivers/am/alsa_rawmidi.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../drivers/am/alsa_seqmidi.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../drivers/am/midi_pack.h" />
+		<Unit filename="../drivers/am/midi_unpack.h" />
+		<Unit filename="../drivers/coreaudio/Makefile.am" />
+		<Unit filename="../drivers/coreaudio/coreaudio_driver.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../drivers/coreaudio/coreaudio_driver.h" />
+		<Unit filename="../drivers/dummy/Makefile.am" />
+		<Unit filename="../drivers/dummy/dummy_driver.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../drivers/dummy/dummy_driver.h" />
+		<Unit filename="../drivers/firewire/Makefile.am" />
+		<Unit filename="../drivers/firewire/ffado_driver.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../drivers/firewire/ffado_driver.h" />
+		<Unit filename="../drivers/freebob/Makefile.am" />
+		<Unit filename="../drivers/freebob/freebob_driver.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../drivers/freebob/freebob_driver.h" />
+		<Unit filename="../drivers/iio/Makefile.am" />
+		<Unit filename="../drivers/iio/iio_driver.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../drivers/iio/iio_driver.h" />
+		<Unit filename="../drivers/netjack/Makefile.am" />
+		<Unit filename="../drivers/netjack/README" />
+		<Unit filename="../drivers/netjack/net_driver.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../drivers/netjack/net_driver.h" />
+		<Unit filename="../drivers/netjack/netjack.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../drivers/netjack/netjack.h" />
+		<Unit filename="../drivers/netjack/netjack_packet.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../drivers/netjack/netjack_packet.h" />
+		<Unit filename="../drivers/oss/Makefile.am" />
+		<Unit filename="../drivers/oss/oss_driver.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../drivers/oss/oss_driver.h" />
+		<Unit filename="../drivers/portaudio/Makefile.am" />
+		<Unit filename="../drivers/portaudio/portaudio_driver.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../drivers/portaudio/portaudio_driver.h" />
+		<Unit filename="../drivers/sun/Makefile.am" />
+		<Unit filename="../drivers/sun/sun_driver.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../drivers/sun/sun_driver.h" />
+		<Unit filename="../include/Makefile.am" />
+		<Unit filename="../include/atomicity.h" />
+		<Unit filename="../include/bitset.h" />
+		<Unit filename="../include/driver.h" />
+		<Unit filename="../include/driver_interface.h" />
+		<Unit filename="../include/driver_parse.h" />
+		<Unit filename="../include/engine.h" />
+		<Unit filename="../include/hardware.h" />
+		<Unit filename="../include/internal.h" />
+		<Unit filename="../include/intsimd.h" />
+		<Unit filename="../include/memops.h" />
+		<Unit filename="../include/messagebuffer.h" />
+		<Unit filename="../include/pool.h" />
+		<Unit filename="../include/port.h" />
+		<Unit filename="../include/sanitycheck.h" />
+		<Unit filename="../include/shm.h" />
+		<Unit filename="../include/start.h" />
+		<Unit filename="../include/systemtest.h" />
+		<Unit filename="../include/unlock.h" />
+		<Unit filename="../include/varargs.h" />
+		<Unit filename="../include/version.h.in" />
+		<Unit filename="../jack.pc.in" />
+		<Unit filename="../jack.spec.in" />
+		<Unit filename="../jackd/ChangeLog" />
+		<Unit filename="../jackd/Makefile.am" />
+		<Unit filename="../jackd/clientengine.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../jackd/clientengine.h" />
+		<Unit filename="../jackd/controlapi.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../jackd/engine.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../jackd/jackd.1.in" />
+		<Unit filename="../jackd/jackd.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../jackd/jackstart.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../jackd/md5.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../jackd/md5.h" />
+		<Unit filename="../jackd/md5_loc.h" />
+		<Unit filename="../jackd/transengine.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../jackd/transengine.h" />
+		<Unit filename="../libjack/ChangeLog" />
+		<Unit filename="../libjack/Makefile.am" />
+		<Unit filename="../libjack/client.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../libjack/driver.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../libjack/intclient.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../libjack/local.h" />
+		<Unit filename="../libjack/messagebuffer.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../libjack/metadata.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../libjack/midiport.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../libjack/pool.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../libjack/port.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../libjack/ringbuffer.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../libjack/sanitycheck.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../libjack/shm.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../libjack/simd.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../libjack/systemtest.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../libjack/thread.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../libjack/time.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../libjack/transclient.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../libjack/unlock.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../libjack/uuid.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../python/Makefile.am" />
+		<Extensions>
+			<envvars />
+			<code_completion />
+			<debugger />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

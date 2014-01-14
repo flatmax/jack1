@@ -6,63 +6,63 @@ contributions to those discussions came from (in alphabetical order):
     David Olofson
     Benno Sennoner
     Kai Vehmanen
-    
+
 Many other members of LAD contributed ideas to JACK, particularly
 Richard Guenther.
 
 CONTRIBUTORS (in rough chronological order)
 
-Paul Davis 
+Paul Davis
 	the principal author of the JACK API and of the
-	implementation contained here.  
+	implementation contained here.
 
-Jack O'Quin 
+Jack O'Quin
 	frequently acted as the primary maintainer of JACK for long
-	periods, and has contributed many new interfaces and bug fixes.  
+	periods, and has contributed many new interfaces and bug fixes.
 
-Andy Wingo 
+Andy Wingo
 Kai Vehmanen
-	provided many small patches and documentation.  
+	provided many small patches and documentation.
 
-Fernando Pablo Lopez-Lezcano 
+Fernando Pablo Lopez-Lezcano
 	contributed the capabilities-based code for Linux 2.4,
 	and the RPM specfile.
 
 Jeremy Hall
-Steve Harris 
-Martin Boer 
-	contributed sample clients and utilities.  
+Steve Harris
+Martin Boer
+	contributed sample clients and utilities.
 
-Taybin Rutkin 
+Taybin Rutkin
 	manages releases and patch handling.
 
-Melanie Thielker 
+Melanie Thielker
 	contributed significantly to JACK's interaction with
-	aspects of both POSIX and System V APIs.  
+	aspects of both POSIX and System V APIs.
 
-Stephane Letz 
+Stephane Letz
 	ported JACK to Mac OS X and Windows, reimplemented
 	JACK in C++ to give Jackdmp/JACK 2, lots of design
 	work, bug fixes and testing.
 
-Jussi Laako 
-	wrote the OSS driver interface.  
+Jussi Laako
+	wrote the OSS driver interface.
 
-Tilman Linneweh 
-	ported JACK to FreeBSD.  
+Tilman Linneweh
+	ported JACK to FreeBSD.
 
-Johnny Petrantoni 
-	wrote the Mac OS X CoreAudio driver interface.  
+Johnny Petrantoni
+	wrote the Mac OS X CoreAudio driver interface.
 
-Rui Nuno Capela 
+Rui Nuno Capela
 	designed and implemented JACK improvements to work with his
-	QJackCtl graphical interface for JACK.  
+	QJackCtl graphical interface for JACK.
 
-Karsten Wiese 
+Karsten Wiese
 	(with Rui) added US-X2Y USB device support to the
 	ALSA backend, added read/write lock support.
 
-Lee Revell 
+Lee Revell
 	contributed statistical interfaces and much low-latency realtime testing.
 
 Ian Esten
@@ -91,6 +91,9 @@ Marc-Olivier Barre
 
 Torben Hohn
        wrote netjack, implemented mixed 64/32 bit support and bug fixes.
+
+Matt Flax <flatmax@>
+    implemented the IIO driver for Jack.
 
 Many others have contributed patches and/or test results, and we thank
 them all.
