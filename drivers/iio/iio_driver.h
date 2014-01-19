@@ -38,7 +38,7 @@ typedef struct _iio_driver {
 //	unsigned int nperiods;
 	unsigned int capture_channels;
 	unsigned int playback_channels;
-//
+
 //	char *indev;
 //	char *outdev;
 //	int infd;
@@ -55,12 +55,22 @@ typedef struct _iio_driver {
 
     jack_nframes_t  sample_rate; ///< The sample rate of the IIO chip.
     unsigned long   wait_time; ///< The time to wait between calls.
+#ifdef HAVE_CLOCK_GETTIME
+    struct timespec next_wakeup;
+#else
+    jack_time_t     next_time;
+#endif
 
     void *IIO_devices; ///< The IIO C++ class maintaining all devices with a particular chip name.
+    float maxDelayUSecs; ///< The maximum number of micro seconds the buffer can hold
+    void *data; ///< The data read in from the IIO devices is stored here.
 } iio_driver_t;
 
 /** Function called by jack to init. the IIO driver, possibly passing in variables.
 */
 jack_driver_t *driver_initialize (jack_client_t *client, const JSList * params);
+jack_driver_desc_t *driver_get_descriptor();
+void driver_finish (jack_driver_t *driver);
+extern const char driver_client_name[];
 #endif
 

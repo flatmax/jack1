@@ -211,7 +211,7 @@
 		</Unit>
 		<Unit filename="../drivers/freebob/freebob_driver.h" />
 		<Unit filename="../drivers/iio/Makefile.am" />
-		<Unit filename="../drivers/iio/iio_driver.c">
+		<Unit filename="../drivers/iio/iio_driver.C">
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="../drivers/iio/iio_driver.h" />
@@ -353,6 +353,81 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="../python/Makefile.am" />
+		<Unit filename="../tools/Makefile.am" />
+		<Unit filename="../tools/alias.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../tools/alsa_in.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../tools/alsa_out.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../tools/bufsize.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../tools/connect.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../tools/evmon.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../tools/freewheel.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../tools/iodelay.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../tools/ipload.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../tools/ipunload.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../tools/load_test.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../tools/lsp.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../tools/midi_dump.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../tools/monitor_client.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../tools/netsource.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../tools/property.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../tools/samplerate.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../tools/session_notify.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../tools/transport.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../tools/tw.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../tools/wait.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../tools/zalsa/Makefile.am" />
+		<Unit filename="../tools/zalsa/alsathread.cc" />
+		<Unit filename="../tools/zalsa/alsathread.h" />
+		<Unit filename="../tools/zalsa/jackclient.cc" />
+		<Unit filename="../tools/zalsa/jackclient.h" />
+		<Unit filename="../tools/zalsa/lfqueue.cc" />
+		<Unit filename="../tools/zalsa/lfqueue.h" />
+		<Unit filename="../tools/zalsa/pxthread.cc" />
+		<Unit filename="../tools/zalsa/pxthread.h" />
+		<Unit filename="../tools/zalsa/zita-a2j.cc" />
+		<Unit filename="../tools/zalsa/zita-j2a.cc" />
 		<Extensions>
 			<envvars />
 			<code_completion />
