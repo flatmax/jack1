@@ -210,6 +210,9 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="../drivers/freebob/freebob_driver.h" />
+		<Unit filename="../drivers/iio/JackIIODriverTest.C">
+			<Option compilerVar="CC" />
+		</Unit>
 		<Unit filename="../drivers/iio/Makefile.am" />
 		<Unit filename="../drivers/iio/iio_driver.C">
 			<Option compilerVar="CC" />
@@ -267,6 +270,21 @@
 		<Unit filename="../include/version.h.in" />
 		<Unit filename="../jack.pc.in" />
 		<Unit filename="../jack.spec.in" />
+		<Unit filename="../jack/control.h" />
+		<Unit filename="../jack/intclient.h" />
+		<Unit filename="../jack/jack.h" />
+		<Unit filename="../jack/jslist.h" />
+		<Unit filename="../jack/metadata.h" />
+		<Unit filename="../jack/midiport.h" />
+		<Unit filename="../jack/ringbuffer.h" />
+		<Unit filename="../jack/session.h" />
+		<Unit filename="../jack/statistics.h" />
+		<Unit filename="../jack/thread.h" />
+		<Unit filename="../jack/transport.h" />
+		<Unit filename="../jack/types.h" />
+		<Unit filename="../jack/uuid.h" />
+		<Unit filename="../jack/weakjack.h" />
+		<Unit filename="../jack/weakmacros.h" />
 		<Unit filename="../jackd/ChangeLog" />
 		<Unit filename="../jackd/Makefile.am" />
 		<Unit filename="../jackd/clientengine.c">

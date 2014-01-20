@@ -4,7 +4,7 @@
  *
  *  Copyright (C) 2001-2003 Paul Davis
  *  Copyright (C) 2004 Jack O'Quin
- *  
+ *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2 of the License, or
@@ -28,7 +28,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <signal.h>
-#include <uuid/uuid.h>
+/*#include <uuid/uuid.h>*/
 
 #include "internal.h"
 #include "engine.h"
@@ -68,14 +68,14 @@ jack_client_disconnect_ports (jack_engine_t *engine,
 	client->truefeeds = 0;
 	client->sortfeeds = 0;
 	client->ports = 0;
-}			
+}
 
 int
 jack_client_do_deactivate (jack_engine_t *engine,
 			   jack_client_internal_t *client, int sort_graph)
 {
 	/* caller must hold engine->client_lock and must have checked for and/or
-	 *   cleared all connections held by client. 
+	 *   cleared all connections held by client.
 	 */
 	VERBOSE(engine,"+++ deactivate %s", client->control->name);
 
@@ -84,10 +84,10 @@ jack_client_do_deactivate (jack_engine_t *engine,
 	jack_transport_client_exit (engine, client);
 
 	if (!jack_client_is_internal (client) &&
-	    engine->external_client_cnt > 0) {	
+	    engine->external_client_cnt > 0) {
 		engine->external_client_cnt--;
 	}
-	
+
 	if (sort_graph) {
 		jack_sort_graph (engine);
 	}
@@ -113,7 +113,7 @@ jack_load_client (jack_engine_t *engine, jack_client_internal_t *client,
         }
 
 	client->handle = dlopen (path_to_so, RTLD_NOW|RTLD_GLOBAL);
-	
+
 	if (client->handle == 0) {
 		if ((errstr = dlerror ()) != 0) {
 			jack_error ("%s", errstr);
@@ -134,7 +134,7 @@ jack_load_client (jack_engine_t *engine, jack_client_internal_t *client,
 
 	client->finish = (void (*)(void *)) dlsym (client->handle,
 						   "jack_finish");
-	
+
 	if ((errstr = dlerror ()) != 0) {
 		jack_error ("%s has no finish() function", so_name);
 		dlclose (client->handle);
@@ -203,7 +203,7 @@ jack_remove_client (jack_engine_t *engine, jack_client_internal_t *client)
 			if (write (engine->session_reply_fd, &finalizer, sizeof (finalizer))
 					< (ssize_t) sizeof (finalizer)) {
 				jack_error ("cannot write SessionNotify result "
-						"to client via fd = %d (%s)", 
+						"to client via fd = %d (%s)",
 						engine->session_reply_fd, strerror (errno));
 			}
 			engine->session_reply_fd = -1;
@@ -213,10 +213,10 @@ jack_remove_client (jack_engine_t *engine, jack_client_internal_t *client)
 	if (client->control->type == ClientExternal) {
 
 		/* try to force the server thread to return from poll */
-	
+
 		close (client->event_fd);
 		close (client->request_fd);
-	} 
+	}
 
         VERBOSE (engine, "before: client list contains %d", jack_slist_length (engine->clients));
 
@@ -244,7 +244,7 @@ jack_remove_client (jack_engine_t *engine, jack_client_internal_t *client)
                                 external_clients++;
                         }
                 }
-                
+
                 if (external_clients == 0) {
                         if (engine->wait_pid >= 0) {
                                 /* block new clients from being created
@@ -257,7 +257,7 @@ jack_remove_client (jack_engine_t *engine, jack_client_internal_t *client)
                                 VERBOSE (engine, "Kill wait pid to stop");
                                 kill (engine->wait_pid, SIGUSR2);
                                 /* unlock the graph so that the server thread can finish */
-                                jack_unlock_graph (engine);                        
+                                jack_unlock_graph (engine);
                                 sleep (-1);
                         } else {
                                 exit (0);
@@ -292,12 +292,12 @@ jack_check_clients (jack_engine_t* engine, int with_timeout_check)
 			 * scheduler screwed us up and never woke up the
 			 * client in time. sigh.
 			 */
-			
-			VERBOSE (engine, "checking client %s: awake at %" PRIu64 " finished at %" PRIu64, 
+
+			VERBOSE (engine, "checking client %s: awake at %" PRIu64 " finished at %" PRIu64,
 				 client->control->name,
 				 client->control->awake_at,
 				 client->control->finished_at);
-			
+
 			if (client->control->awake_at > 0) {
 				if (client->control->finished_at == 0) {
 					jack_time_t now = jack_get_microseconds();
@@ -330,7 +330,7 @@ jack_check_clients (jack_engine_t* engine, int with_timeout_check)
 			}
 		}
 	}
-		
+
 	if (errs) {
 		jack_engine_signal_problems (engine);
 	}
@@ -352,20 +352,20 @@ jack_remove_clients (jack_engine_t* engine, int* exit_freewheeling_when_done)
 	/* remove all dead clients */
 
 	for (node = engine->clients; node; ) {
-		
+
 		tmp = jack_slist_next (node);
-		
+
 		client = (jack_client_internal_t *) node->data;
 
 		VERBOSE(engine, "client %s error status %d", client->control->name, client->error);
-		
+
 		if (client->error) {
-			
+
 			if (engine->freewheeling && jack_uuid_compare (client->control->uuid, engine->fwclient) == 0) {
 				VERBOSE (engine, "freewheeling client has errors");
 				*exit_freewheeling_when_done = 1;
 			}
-			
+
 			/* if we have a communication problem with the
 			   client, remove it. otherwise, turn it into
 			   a zombie. the client will/should realize
@@ -376,7 +376,7 @@ jack_remove_clients (jack_engine_t* engine, int* exit_freewheeling_when_done)
 			if (client->error >= JACK_ERROR_WITH_SOCKETS) {
 				VERBOSE (engine, "removing failed "
 					 "client %s state = %s errors"
-					 " = %d", 
+					 " = %d",
 					 client->control->name,
 					 jack_client_state_name (client),
 					 client->error);
@@ -386,7 +386,7 @@ jack_remove_clients (jack_engine_t* engine, int* exit_freewheeling_when_done)
 			} else {
 				VERBOSE (engine, "client failure: "
 					 "client %s state = %s errors"
-					 " = %d", 
+					 " = %d",
 					 client->control->name,
 					 jack_client_state_name (client),
 					 client->error);
@@ -400,14 +400,14 @@ jack_remove_clients (jack_engine_t* engine, int* exit_freewheeling_when_done)
 
 			need_sort = TRUE;
 		}
-		
+
 		node = tmp;
 	}
 
 	if (need_sort) {
 		jack_sort_graph (engine);
 	}
-	
+
 	jack_engine_reset_rolling_usecs (engine);
 
 	VERBOSE (engine, "-- Removing failed clients ...");
@@ -448,7 +448,7 @@ jack_client_id_by_name (jack_engine_t *engine, const char *name, jack_uuid_t id)
 		if (strcmp ((const char *) ((jack_client_internal_t *)
 					    node->data)->control->name,
 			    name) == 0) {
-			jack_client_internal_t *client = 
+			jack_client_internal_t *client =
 				(jack_client_internal_t *) node->data;
 			jack_uuid_copy (&id, client->control->uuid);
                         ret = 0;
@@ -584,13 +584,13 @@ jack_setup_client_control (jack_engine_t *engine, int fd, ClientType type, const
 	client->error = 0;
 
 	if (type != ClientExternal) {
-		
+
 		client->control = (jack_client_control_t *)
-			malloc (sizeof (jack_client_control_t));		
+			malloc (sizeof (jack_client_control_t));
 
 	} else {
 
-                if (jack_shmalloc (sizeof (jack_client_control_t), 
+                if (jack_shmalloc (sizeof (jack_client_control_t),
 				   &client->control_shm)) {
                         jack_error ("cannot create client control block for %s",
 				    name);
@@ -662,7 +662,7 @@ jack_setup_client_control (jack_engine_t *engine, int fd, ClientType type, const
 	}
 #endif
 	jack_transport_client_new (client);
-        
+
 #ifdef JACK_USE_MACH_THREADS
         /* specific resources for server/client real-time thread
 	 * communication */
@@ -729,9 +729,9 @@ setup_client (jack_engine_t *engine, ClientType type, char *name,
 	}
 
         jack_uuid_unparse (client->control->uuid, bufx);
-                
-	VERBOSE (engine, "new client: %s, uuid = %s" 
-		 " type %d @ %p fd = %d", 
+
+	VERBOSE (engine, "new client: %s, uuid = %s"
+		 " type %d @ %p fd = %d",
 		 client->control->name, bufx,
 		 type, client->control, client_fd);
 
@@ -759,7 +759,7 @@ setup_client (jack_engine_t *engine, ClientType type, char *name,
 	jack_lock_graph (engine);
  	engine->clients = jack_slist_prepend (engine->clients, client);
 	jack_engine_reset_rolling_usecs (engine);
-	
+
 	if (jack_client_is_internal(client)) {
 
 
@@ -793,7 +793,7 @@ setup_client (jack_engine_t *engine, ClientType type, char *name,
 
 		jack_unlock_graph (engine);
 	}
-	
+
 	return client;
 }
 
@@ -853,7 +853,7 @@ jack_get_reserved_name (jack_engine_t *engine, jack_uuid_t uuid)
 		if (jack_uuid_compare (reservation->uuid, uuid) != 0) {
 			char *retval = strdup (reservation->name);
 			free (reservation);
-			engine->reserved_client_names = 
+			engine->reserved_client_names =
 				jack_slist_remove (engine->reserved_client_names, reservation);
 			return retval;
 		}
@@ -874,7 +874,7 @@ jack_client_create (jack_engine_t *engine, int client_fd)
         VALGRIND_MEMSET(&res, 0, sizeof (res));
 
         nbytes = read (client_fd, &req, sizeof (req));
-        
+
         if (nbytes == 0) {		/* EOF? */
                 jack_error ("cannot read connection request from client (%s)", strerror(errno));
                 return -1;
@@ -903,11 +903,11 @@ jack_client_create (jack_engine_t *engine, int client_fd)
 		if (jack_client_id_by_name(engine, req.name, id) == 0) {
 			rc = handle_unload_client (engine, id);
 		}
-		
+
 		/* close does not send a reply */
 		return rc;
 	}
-	
+
 	pthread_mutex_lock (&engine->request_lock);
 	if (!jack_uuid_empty (req.uuid)) {
 		char *res_name = jack_get_reserved_name (engine, req.uuid);
@@ -935,7 +935,7 @@ jack_client_create (jack_engine_t *engine, int client_fd)
 	/* Mach port number for server/client communication */
 	res.portnum = client->portnum;
 #endif
-	
+
 	if (jack_client_is_internal(client)) {
 		/* the ->control pointers are for an internal client
 		   so we know they are the right sized pointers
@@ -1021,7 +1021,7 @@ jack_client_activate (jack_engine_t *engine, jack_uuid_t id)
 
 	jack_unlock_graph (engine);
 	return ret;
-}	
+}
 
 int
 jack_client_deactivate (jack_engine_t *engine, jack_uuid_t id)
@@ -1035,9 +1035,9 @@ jack_client_deactivate (jack_engine_t *engine, jack_uuid_t id)
 
 		jack_client_internal_t *client =
 			(jack_client_internal_t *) node->data;
-                
+
 		if (jack_uuid_compare (client->control->uuid, id) == 0) {
-		        
+
 	        	JSList *portnode;
 			jack_port_internal_t *port;
 
@@ -1055,7 +1055,7 @@ jack_client_deactivate (jack_engine_t *engine, jack_uuid_t id)
 	jack_unlock_graph (engine);
 
 	return ret;
-}	
+}
 
 
 int

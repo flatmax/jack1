@@ -45,7 +45,7 @@ if test $not_overwriting -gt 0 ; then
     echo "INSTALL. Please contact the distribution packager for JACK and"
     echo "ask them to fix their packaging."
     echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-    exit 1
+#    exit 1
 fi
 
 AC_CONFIG_AUX_DIR(config)
@@ -658,14 +658,14 @@ if test "x$USE_BARRIER" = "xyes"; then
 		AC_DEFINE(USE_BARRIER, 1, [Use pthread barrier functions]))
 fi
 
-HAVE_UUID=false
-PKG_CHECK_MODULES(UUID,uuid > 1.0,[HAVE_UUID=true], [true])
-if test x$HAVE_UUID = xfalse ; then
-      AC_MSG_ERROR([*** You do not have libuuid installed])
-else
-        CFLAGS="$CFLAGS $UUID_CFLAGS"
-        LIBS="$LIBS $UUID_LIBS"
-fi
+#HAVE_UUID=false
+#PKG_CHECK_MODULES(UUID,uuid > 1.0,[HAVE_UUID=true], [true])
+#if test x$HAVE_UUID = xfalse ; then
+#      AC_MSG_ERROR([*** You do not have libuuid installed])
+#else
+#        CFLAGS="$CFLAGS $UUID_CFLAGS"
+#        LIBS="$LIBS $UUID_LIBS"
+#fi
 
 # some example-clients need libsndfile
 HAVE_SNDFILE=false
