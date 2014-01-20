@@ -1,19 +1,19 @@
 /*
     Copyright (C) 2001-2003 Paul Davis
     Copyright (C) 2005 Jussi Laako
-    
+
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU Lesser General Public License as published by
     the Free Software Foundation; either version 2.1 of the License, or
     (at your option) any later version.
-    
+
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU Lesser General Public License for more details.
-    
+
     You should have received a copy of the GNU Lesser General Public License
-    along with this program; if not, write to the Free Software 
+    along with this program; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 */
@@ -24,7 +24,6 @@
 
 #include <config.h>
 #include <sys/mman.h>
-#include <uuid/uuid.h>
 
 #include <jack/jack.h>
 #include <jack/types.h>
@@ -53,22 +52,22 @@ static void    jack_audio_port_mixdown (jack_port_t *port,
  * the application process. */
 jack_port_functions_t jack_builtin_audio_functions = {
 	.buffer_init    = jack_generic_buffer_init,
-	.mixdown = jack_audio_port_mixdown, 
+	.mixdown = jack_audio_port_mixdown,
 };
 
 extern jack_port_functions_t jack_builtin_midi_functions;
 
 jack_port_functions_t jack_builtin_NULL_functions = {
 	.buffer_init    = jack_generic_buffer_init,
-	.mixdown = NULL, 
+	.mixdown = NULL,
 };
 
 /* Only the Audio and MIDI port types are currently built in. */
 jack_port_type_info_t jack_builtin_port_types[] = {
-	{ .type_name = JACK_DEFAULT_AUDIO_TYPE, 
+	{ .type_name = JACK_DEFAULT_AUDIO_TYPE,
 	  .buffer_scale_factor = 1,
 	},
-	{ .type_name = JACK_DEFAULT_MIDI_TYPE, 
+	{ .type_name = JACK_DEFAULT_MIDI_TYPE,
 	  .buffer_scale_factor = -1,
           .buffer_size = 2048
 	},
@@ -147,8 +146,8 @@ jack_port_name_equals (jack_port_shared_t* port, const char* target)
 		target = buf;
 	}
 
-	return (strcmp (port->name, target) == 0 || 
-		strcmp (port->alias1, target) == 0 || 
+	return (strcmp (port->name, target) == 0 ||
+		strcmp (port->alias1, target) == 0 ||
 		strcmp (port->alias2, target) == 0);
 }
 
@@ -171,7 +170,7 @@ jack_get_port_functions(jack_port_type_id_t ptid)
  */
 static void
 jack_generic_buffer_init(void *buffer, size_t size, jack_nframes_t nframes)
-{ 
+{
 	memset(buffer, 0, size);
 }
 
@@ -187,7 +186,7 @@ jack_port_new (const jack_client_t *client, jack_port_id_t port_id,
 	if ((port = (jack_port_t *) malloc (sizeof (jack_port_t))) == NULL) {
 		return NULL;
 	}
-	
+
 	port->mix_buffer = NULL;
 	port->client_segment_base = NULL;
 	port->shared = shared;
@@ -197,10 +196,10 @@ jack_port_new (const jack_client_t *client, jack_port_id_t port_id,
 	port->tied = NULL;
 
 	if (jack_uuid_compare (client->control->uuid, port->shared->client_id) == 0) {
-			
+
 		/* It's our port, so initialize the pointers to port
 		 * functions within this address space.  These builtin
-		 * definitions can be overridden by the client. 
+		 * definitions can be overridden by the client.
 		 */
 		jack_port_functions_t *port_functions = jack_get_port_functions(ptid);
 		if (port_functions == NULL)
@@ -222,7 +221,7 @@ jack_port_new (const jack_client_t *client, jack_port_id_t port_id,
 	return port;
 }
 
-size_t 
+size_t
 jack_port_type_get_buffer_size (jack_client_t *client, const char *port_type)
 {
 	int i;
@@ -239,7 +238,7 @@ jack_port_type_get_buffer_size (jack_client_t *client, const char *port_type)
 }
 
 jack_port_t *
-jack_port_register (jack_client_t *client, 
+jack_port_register (jack_client_t *client,
 		    const char *port_name,
 		    const char *port_type,
 		    unsigned long flags,
@@ -258,7 +257,7 @@ jack_port_register (jack_client_t *client,
 	if ( length >= sizeof (req.x.port_info.name) ) {
 	  jack_error ("\"%s:%s\" is too long to be used as a JACK port name.\n"
 		      "Please use %lu characters or less.",
-		      client->control->name , 
+		      client->control->name ,
 		      port_name,
 		      sizeof (req.x.port_info.name) - 1);
 	  return NULL ;
@@ -291,11 +290,11 @@ jack_port_register (jack_client_t *client,
 	return port;
 }
 
-int 
+int
 jack_port_unregister (jack_client_t *client, jack_port_t *port)
 {
 	jack_request_t req;
-        
+
         VALGRIND_MEMSET (&req, 0, sizeof (req));
 
 
@@ -325,13 +324,13 @@ jack_port_connected_to (const jack_port_t *port, const char *portname)
 	   while we are checking for them. that's hard,
 	   and has a non-trivial performance impact
 	   for jackd.
-	*/  
+	*/
 
 	pthread_mutex_lock (&((jack_port_t *) port)->connection_lock);
 
 	for (node = port->connections; node; node = jack_slist_next (node)) {
 		jack_port_t *other_port = (jack_port_t *) node->data;
-		
+
 		if (jack_port_name_equals (other_port->shared, portname)) {
 			ret = TRUE;
 			break;
@@ -354,7 +353,7 @@ jack_port_get_connections (const jack_port_t *port)
 	   while we are checking for them. that's hard,
 	   and has a non-trivial performance impact
 	   for jackd.
-	*/  
+	*/
 
 	pthread_mutex_lock (&((jack_port_t *) port)->connection_lock);
 
@@ -397,7 +396,7 @@ jack_port_get_all_connections (const jack_client_t *client,
 	}
 
         VALGRIND_MEMSET (&req, 0, sizeof (req));
-		
+
 	req.type = GetPortConnections;
 
 	req.x.port_info.name[0] = '\0';
@@ -424,7 +423,7 @@ jack_port_get_all_connections (const jack_client_t *client,
 
 	for (i = 0; i < req.x.port_connections.nports; ++i ) {
 		jack_port_id_t port_id;
-		
+
 		if (read (client->request_fd, &port_id, sizeof (port_id))
 		    != sizeof (port_id)) {
 			jack_error ("cannot read port id from server");
@@ -478,7 +477,7 @@ jack_port_by_id (jack_client_t *client, jack_port_id_t id)
 			return port;
 		}
 	}
-	
+
 	// Otherwise possibly allocate a new port structure, keep it in the ports_ext list for later use
 	port = jack_port_by_id_int (client,id,&need_free);
 	if (port != NULL && need_free)
@@ -492,10 +491,10 @@ jack_port_by_name_int (jack_client_t *client, const char *port_name)
 {
 	unsigned long i, limit;
 	jack_port_shared_t *port;
-	
+
 	limit = client->engine->port_max;
 	port = &client->engine->ports[0];
-	
+
 	for (i = 0; i < limit; i++) {
 		if (port[i].in_use && jack_port_name_equals (&port[i], port_name)) {
 			return jack_port_new (client, port[i].id,
@@ -518,7 +517,7 @@ jack_port_by_name (jack_client_t *client,  const char *port_name)
 			return port;
 		}
 	}
-	
+
 	/* Otherwise allocate a new port structure, keep it in the
 	 * ports_ext list for later use. */
 	port = jack_port_by_name_int (client, port_name);
@@ -544,7 +543,7 @@ void
 jack_port_set_latency (jack_port_t *port, jack_nframes_t nframes)
 {
 	port->shared->latency = nframes;
-	
+
 	/* setup the new latency values here,
 	 * so we dont need to change the backend codes.
 	 */
@@ -570,7 +569,7 @@ jack_port_get_buffer (jack_port_t *port, jack_nframes_t nframes)
 		if (port->tied) {
 			return jack_port_get_buffer (port->tied, nframes);
 		}
-                
+
                 if (port->client_segment_base == NULL || *port->client_segment_base == MAP_FAILED) {
                         return NULL;
                 }
@@ -584,7 +583,7 @@ jack_port_get_buffer (jack_port_t *port, jack_nframes_t nframes)
 	   server), there is no need to take the connection lock here
 	*/
 	if ((node = port->connections) == NULL) {
-		
+
                 if (port->client_segment_base == NULL || *port->client_segment_base == MAP_FAILED) {
                         return NULL;
                 }
@@ -620,7 +619,7 @@ jack_port_type_buffer_size (jack_port_type_info_t* port_type_info, jack_nframes_
 {
 	if( port_type_info->buffer_scale_factor < 0 ) {
 		return port_type_info->buffer_size;
-	} 
+	}
 
 	return port_type_info->buffer_scale_factor
 		* sizeof (jack_default_audio_sample_t)
@@ -656,7 +655,7 @@ jack_port_untie (jack_port_t *port)
 	return 0;
 }
 
-int 
+int
 jack_port_request_monitor (jack_port_t *port, int onoff)
 
 {
@@ -670,14 +669,14 @@ jack_port_request_monitor (jack_port_t *port, int onoff)
 
 		JSList *node;
 
-		/* this port is for input, so recurse over each of the 
+		/* this port is for input, so recurse over each of the
 		   connected ports.
 		 */
 
 		pthread_mutex_lock (&port->connection_lock);
 		for (node = port->connections; node;
 		     node = jack_slist_next (node)) {
-			
+
 			/* drop the lock because if there is a feedback loop,
 			   we will deadlock. XXX much worse things will
 			   happen if there is a feedback loop !!!
@@ -693,8 +692,8 @@ jack_port_request_monitor (jack_port_t *port, int onoff)
 
 	return 0;
 }
-	
-int 
+
+int
 jack_port_request_monitor_by_name (jack_client_t *client,
 				   const char *port_name, int onoff)
 
@@ -705,7 +704,7 @@ jack_port_request_monitor_by_name (jack_client_t *client,
 
 	limit = client->engine->port_max;
 	ports = &client->engine->ports[0];
-	
+
 	for (i = 0; i < limit; i++) {
 		if (ports[i].in_use &&
 		    strcmp (ports[i].name, port_name) == 0) {
@@ -758,7 +757,7 @@ int
 jack_port_get_aliases (const jack_port_t *port, char* const aliases[2])
 {
 	int cnt = 0;
-	
+
 	if (port->shared->alias1[0] != '\0') {
 		snprintf (aliases[0], JACK_CLIENT_NAME_SIZE+JACK_PORT_NAME_SIZE, "%s", port->shared->alias1);
 		cnt++;
@@ -782,7 +781,7 @@ jack_port_short_name (const jack_port_t *port)
 	return strchr (port->shared->name, ':') + 1;
 }
 
-int 
+int
 jack_port_is_mine (const jack_client_t *client, const jack_port_t *port)
 {
 	return jack_uuid_compare (port->shared->client_id, client->control->uuid) == 0;
@@ -810,7 +809,7 @@ jack_port_set_name (jack_port_t *port, const char *new_name)
 	len = sizeof (port->shared->name) -
 		((int) (colon - port->shared->name)) - 2;
 	snprintf (colon+1, len, "%s", new_name);
-        
+
 	return 0;
 }
 
@@ -842,13 +841,13 @@ jack_port_unset_alias (jack_port_t *port, const char *alias)
 	return 0;
 }
 
-void 
+void
 jack_port_set_latency_range (jack_port_t *port, jack_latency_callback_mode_t mode, jack_latency_range_t *range)
 {
 	if (mode == JackCaptureLatency) {
 		port->shared->capture_latency = *range;
 
-		/* hack to set port->shared->latency up for 
+		/* hack to set port->shared->latency up for
 		 * backend ports
 		 */
 		if ((port->shared->flags & JackPortIsOutput) && (port->shared->flags & JackPortIsPhysical))
@@ -856,7 +855,7 @@ jack_port_set_latency_range (jack_port_t *port, jack_latency_callback_mode_t mod
 	} else {
 		port->shared->playback_latency = *range;
 
-		/* hack to set port->shared->latency up for 
+		/* hack to set port->shared->latency up for
 		 * backend ports
 		 */
 		if ((port->shared->flags & JackPortIsInput) && (port->shared->flags & JackPortIsPhysical))
@@ -865,7 +864,7 @@ jack_port_set_latency_range (jack_port_t *port, jack_latency_callback_mode_t mod
 	}
 }
 
-void 
+void
 jack_port_get_latency_range (jack_port_t *port, jack_latency_callback_mode_t mode, jack_latency_range_t *range)
 {
 	if (mode == JackCaptureLatency)
@@ -886,7 +885,7 @@ static inline float f_max(float x, float a)
 	return (x);
 }
 
-static void 
+static void
 jack_audio_port_mixdown (jack_port_t *port, jack_nframes_t nframes)
 {
 	JSList *node;
