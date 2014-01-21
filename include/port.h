@@ -1,18 +1,18 @@
 /*
     Copyright (C) 2001 Paul Davis
-    
+
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU Lesser General Public License as published by
     the Free Software Foundation; either version 2.1 of the License, or
     (at your option) any later version.
-    
+
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU Lesser General Public License for more details.
-    
+
     You should have received a copy of the GNU Lesser General Public License
-    along with this program; if not, write to the Free Software 
+    along with this program; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 */
@@ -38,7 +38,7 @@
  *   - one other
  *
  * which is probably enough for more than just the foreseeable future.
- */              
+ */
 #define JACK_MAX_PORT_TYPES 4
 #define JACK_AUDIO_PORT_TYPE 0
 #define JACK_MIDI_PORT_TYPE 1
@@ -47,7 +47,7 @@
 #define JACK_CLIENT_NAME_SIZE 33
 
 /* JACK shared memory segments are limited to MAX_INT32, they can be
- * shared between 32-bit and 64-bit clients. 
+ * shared between 32-bit and 64-bit clients.
  */
 #define JACK_SHM_MAX (MAX_INT32)
 typedef int32_t jack_port_type_id_t;
@@ -59,17 +59,18 @@ typedef int32_t jack_port_type_id_t;
 /* POST_PACKED_STRUCTURE needs to be a macro which
    expands into a compiler directive. The directive must
    tell the compiler to arrange the preceding structure
-   declaration so that it is packed on byte-boundaries rather 
+   declaration so that it is packed on byte-boundaries rather
    than use the natural alignment of the processor and/or
    compiler.
 */
-#define POST_PACKED_STRUCTURE __attribute__((__packed__))
+//#define POST_PACKED_STRUCTURE __attribute__((__packed__))
+#define POST_PACKED_STRUCTURE
 #else
 /* Add other things here for non-gcc platforms */
 #endif
 #endif
 
-/* Port type structure.  
+/* Port type structure.
  *
  *  (1) One for each port type is part of the engine's jack_control_t
  *  shared memory structure.
@@ -82,10 +83,10 @@ typedef int32_t jack_port_type_id_t;
 typedef struct _jack_port_type_info {
 
     jack_port_type_id_t ptype_id;
-    const char     type_name[JACK_PORT_TYPE_SIZE];      
+    const char     type_name[JACK_PORT_TYPE_SIZE];
 
     /* If == 1, then a buffer to handle nframes worth of data has
-     * sizeof(jack_default_audio_sample_t) * nframes bytes.  
+     * sizeof(jack_default_audio_sample_t) * nframes bytes.
      *
      * If > 1, the buffer allocated for input mixing will be
      * this value times sizeof(jack_default_audio_sample_t)
@@ -113,7 +114,7 @@ typedef struct _jack_port_shared {
     jack_shmsize_t           offset;	/* buffer offset in shm segment */
     jack_port_id_t           id;	/* index into engine port array */
     jack_uuid_t              uuid;
-    uint32_t		     flags;    
+    uint32_t		     flags;
     char                     name[JACK_CLIENT_NAME_SIZE+JACK_PORT_NAME_SIZE];
     char                     alias1[JACK_CLIENT_NAME_SIZE+JACK_PORT_NAME_SIZE];
     char                     alias2[JACK_CLIENT_NAME_SIZE+JACK_PORT_NAME_SIZE];
@@ -143,7 +144,7 @@ typedef struct _jack_port_functions {
 
     /* Function to mixdown multiple inputs to a buffer.  Can be NULL,
      * indicating that multiple input connections are not legal for
-     * this data type. 
+     * this data type.
      */
     void (*mixdown)(jack_port_t *, jack_nframes_t);
 

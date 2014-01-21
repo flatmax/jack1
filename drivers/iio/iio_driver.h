@@ -59,6 +59,7 @@ typedef struct _iio_driver {
     struct timespec next_wakeup;
 #else
     jack_time_t     next_time;
+    jack_time_t     last_xrun_time;
 #endif
 
     void *IIO_devices; ///< The IIO C++ class maintaining all devices with a particular chip name.
