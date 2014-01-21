@@ -43,9 +43,10 @@ extern "C" {
 
 #define IIO_DEFAULT_CHIP "AD7476A" ///< The default IIO recording chip to look for.
 #define IIO_DEFAULT_READ_FS 1.e6 ///< The default IIO sample rate for the default chip.
-#define IIO_DEFAULT_PERIOD_SIZE 1024 ///< The default period size is in the ms range
+#define IIO_DEFAULT_PERIOD_SIZE 2048 ///< The default period size is in the ms range
 #define IIO_DEFAULT_CAPUTURE_PORT_COUNT MAXINT ///< The default number of capture ports is exceedingly big, trimmed down to a realistic size in driver_initialize
-#define IIO_SAFETY_FACTOR 2./3. ///< The default safety factor, allow consumption of this fraction of the available DMA buffer before we don't allow the driver to continue.
+//#define IIO_SAFETY_FACTOR 2./3. ///< The default safety factor, allow consumption of this fraction of the available DMA buffer before we don't allow the driver to continue.
+#define IIO_SAFETY_FACTOR 1. ///< The default safety factor, allow consumption of this fraction of the available DMA buffer before we don't allow the driver to continue.
 
 //#define IIO_DRIVER_N_PARAMS	2
 //const static jack_driver_param_desc_t iio_params[IIO_DRIVER_N_PARAMS] = {
@@ -163,9 +164,9 @@ static int iio_driver_stop (iio_driver_t *driver) {
     return 0;
 }
 
-static int iio_driver_read (iio_driver_t *driver, jack_nframes_t nframes) {
+static int iio_driver_read(iio_driver_t *driver, jack_nframes_t nframes) {
     if (nframes > 0) {
-        cout<<"iio_driver_read nframes = "<<nframes<<"\n";
+        //cout<<"iio_driver_read nframes = "<<nframes<<"\n";
         Eigen::Array<unsigned short int, Eigen::Dynamic, Eigen::Dynamic> *data = static_cast<Eigen::Array<unsigned short int, Eigen::Dynamic, Eigen::Dynamic> *>(driver->data);
         IIO *iio = static_cast<IIO *>(driver->IIO_devices);
         uint devChCnt=(*iio)[0].getChCnt();
@@ -195,13 +196,13 @@ static int iio_driver_read (iio_driver_t *driver, jack_nframes_t nframes) {
 }
 
 static int iio_driver_write (iio_driver_t *driver, jack_nframes_t nframes) {
-    if (nframes>0)
-        cout<<"iio_driver_write nframes = "<<nframes<<"\n";
+    //if (nframes>0)
+    //    cout<<"iio_driver_write nframes = "<<nframes<<"\n";
     return 0;
 }
 
 static int iio_driver_null_cycle (iio_driver_t *driver, jack_nframes_t nframes) {
-    cout<<"iio_driver_null_cycle\n";
+    //cout<<"iio_driver_null_cycle\n";
 
 // output buffers are currently not handled ... in future, add output handling here.
 
@@ -211,28 +212,33 @@ static int iio_driver_null_cycle (iio_driver_t *driver, jack_nframes_t nframes) 
 /** The driver_wait function to work out if we have used more time then available to process one cycle.
 */
 static jack_nframes_t iio_driver_wait(iio_driver_t *driver, int extra_fd, int *status, float *delayed_usecs) {
-    cout<<"iio_driver_wait\n";
-    float maxDelayTime=(IIO_SAFETY_FACTOR*driver->maxDelayUSecs); // this driver can handle this much delay between reads.
+    //cout<<"iio_driver_wait\n";
+    //float maxDelayTime=(IIO_SAFETY_FACTOR*driver->maxDelayUSecs); // this driver can handle this much delay between reads.
+    float maxDelayTime=driver->maxDelayUSecs; // this driver can handle this much delay between reads.
     //cout<<"maxDelayTime "<<maxDelayTime<<endl;
     *status = 0;
 
     jack_time_t now = driver->engine->get_microseconds();
 
-    if (driver->next_time < now)
-        if (driver->next_time == 0) /* first time through */
+    bool xrun=false;
+    if (driver->next_time < now){
+        //cout<<"iio_driver_wait NOT good\n";
+        if (driver->next_time == 0){ /* first time through */
             driver->next_time = now + driver->wait_time;
-        else if ((now - driver->last_wait_ust) > maxDelayTime) { /* xrun */
+            driver->last_xrun_time=now;
+        }else if ((now - driver->last_wait_ust) > maxDelayTime) { /* xrun */
             //cout<<"driver->last_wait_ust "<<driver->last_wait_ust<<" now "<<now<<endl;
-            jack_error("**** iio: xrun of %ju usec", (uintmax_t)now - driver->next_time);
+            //jack_error("**** iio: xrun of %ju usec", (uintmax_t)now - driver->next_time);
+            cout<<"**** iio: xrun of "<<((uintmax_t)now - driver->next_time)<<"u usec last xrun was "<<now-driver->last_xrun_time<<"us ago.\n";
+            driver->last_xrun_time=now;
             driver->next_time = now + driver->wait_time;
             *status=0; // xruns are fatal - but switching to non-fatal during development
+            xrun=true;
             //*status=-1; // xruns are fatal
         } else /* late, but handled by our "buffer" */
             driver->next_time += driver->wait_time;
-    else {
-        jack_time_t wait = driver->next_time - now;
-        struct timespec ts = { .tv_sec = (time_t)wait / (time_t)1000000, .tv_nsec = ((time_t)wait % (time_t)1000000) * 1000 };
-        nanosleep(&ts,NULL);
+    } else {
+        //cout<<"iio_driver_wait all good\n";
         driver->next_time += driver->wait_time;
     }
 
@@ -240,6 +246,7 @@ static jack_nframes_t iio_driver_wait(iio_driver_t *driver, int extra_fd, int *s
     driver->engine->transport_cycle_start (driver->engine, driver->last_wait_ust);
 
     *delayed_usecs = 0;
+    if (xrun) return 0;
     return driver->period_size;
 }
 
@@ -296,10 +303,15 @@ static int iio_driver_bufsize (iio_driver_t *driver, jack_nframes_t nframes) {
             return -1;
         }
     }
+    // if the data matrix is larger in columns then the number of capture channels, then resize it.
+    if ((int)ceil((float)driver->capture_channels/(float)(*iio)[0].getChCnt())<data->cols())
+        data->resize(data->rows(), (int)ceil((float)driver->capture_channels/(float)(*iio)[0].getChCnt()));
 
     // all good, adjust the new variables...
     driver->period_size = nframes;
     driver->period_usecs = driver->wait_time = getUSecs(nframes, driver->sample_rate);
+
+    cout<<"wait_time = "<<driver->wait_time<<endl;
 
     /* tell the engine to change its buffer size */
     if (driver->engine->set_buffer_size (driver->engine, nframes)) {
@@ -390,9 +402,14 @@ jack_driver_t *driver_initialize (jack_client_t *client, const JSList * params) 
             driver->period_usecs = driver->wait_time = getUSecs(driver->period_size, driver->sample_rate);
             driver->maxDelayUSecs=(double)iio->getChannelBufferCnt()/driver->sample_rate*1.e6; // find the duration (in us) each channel can buffer
 
+            cout<<"wait_time = "<<driver->wait_time<<endl;
+            cout<<"maxDelayUSecs = "<<driver->maxDelayUSecs<<endl;
+
+
             bool bufferSizeOK=true;
-            if (driver->wait_time>(IIO_SAFETY_FACTOR*driver->maxDelayUSecs)) {
-                jack_info("iio driver requires a wait time/period of %d us, however the maximum buffer is %d us, which is more then the safety factor of %d.\nIndicating the problem.", driver->wait_time, driver->maxDelayUSecs, IIO_SAFETY_FACTOR);
+            if ((float)driver->wait_time>(IIO_SAFETY_FACTOR*driver->maxDelayUSecs)) {
+                cout<<"iio driver requires a wait time/period of "<<driver->wait_time<<" us, however the maximum buffer is "<<driver->maxDelayUSecs<<" us, which is more then the safety factor of "<<IIO_SAFETY_FACTOR<<".\nIndicating the problem.\n";
+                jack_info("iio driver requires a wait time/period of %d us, however the maximum buffer is %f us, which is more then the safety factor of %f.\nIndicating the problem.", driver->wait_time, driver->maxDelayUSecs, IIO_SAFETY_FACTOR);
                 bufferSizeOK=false; // indicate the error
             }
 
@@ -411,11 +428,15 @@ jack_driver_t *driver_initialize (jack_client_t *client, const JSList * params) 
                 dataCreationOK=false;
             }
 
-            cout<<"matrix size rows = "<<data->rows()<<" cols = "<<data->cols()<<endl;
-
             // if the available number of ports is less then the requested number, then restrict to the number of physical ports.
             if (iio->getChCnt()<driver->capture_channels)
                 driver->capture_channels=iio->getChCnt();
+
+            // if the data matrix is larger in columns then the number of capture channels, then resize it.
+            if ((int)ceil((float)driver->capture_channels/(float)(*iio)[0].getChCnt())<data->cols())
+                data->resize(data->rows(), (int)ceil((float)driver->capture_channels/(float)(*iio)[0].getChCnt()));
+
+            cout<<"matrix size rows = "<<data->rows()<<" cols = "<<data->cols()<<endl;
 
             string name("iio_pcm");
             if ((driver->capture_channels!=0 || driver->playback_channels!=0) && bufferSizeOK && dataCreationOK) {

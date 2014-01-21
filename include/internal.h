@@ -6,7 +6,7 @@
     JACK_PROTOCOL_VERSION in configure.in.
 
     Copyright (C) 2001-2003 Paul Davis
-    
+
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
@@ -39,11 +39,12 @@
 /* POST_PACKED_STRUCTURE needs to be a macro which
    expands into a compiler directive. The directive must
    tell the compiler to arrange the preceding structure
-   declaration so that it is packed on byte-boundaries rather 
+   declaration so that it is packed on byte-boundaries rather
    than use the natural alignment of the processor and/or
    compiler.
 */
-#define POST_PACKED_STRUCTURE __attribute__((__packed__))
+//#define POST_PACKED_STRUCTURE __attribute__((__packed__))
+#define POST_PACKED_STRUCTURE
 #else
 /* Add other things here for non-gcc platforms */
 #endif
@@ -153,13 +154,13 @@ typedef enum {
 typedef struct {
 
 	volatile uint32_t       guard1;
-	volatile jack_nframes_t frames;  
+	volatile jack_nframes_t frames;
 	volatile jack_time_t    current_wakeup;
 	volatile jack_time_t    next_wakeup;
 	volatile float          period_usecs;
 	volatile int32_t        initialized;
 	volatile uint32_t       guard2;
-	
+
 	/* not accessed by clients */
 
 	int32_t  reset_pending;      /* xrun happened, deal with it */
@@ -233,7 +234,7 @@ typedef struct {
     JackEventType type;
     union {
 	uint32_t n;
-        char name[JACK_PORT_NAME_SIZE];    
+        char name[JACK_PORT_NAME_SIZE];
 	jack_port_id_t port_id;
 	jack_port_id_t self_id;
         jack_uuid_t    uuid;
@@ -244,7 +245,7 @@ typedef struct {
 	jack_port_id_t other_id;
         uint32_t key_size; /* key data will follow the event structure */
     } y;
-    union {        
+    union {
             char other_name[JACK_PORT_NAME_SIZE];
             jack_property_change_t property_change;
     } z;
@@ -316,7 +317,7 @@ typedef volatile struct {
 } POST_PACKED_STRUCTURE jack_client_control_t;
 
 typedef struct {
-    
+
     uint32_t	protocol_v;		/* protocol version, must go first */
     int32_t    load;
     ClientType type;
@@ -371,7 +372,7 @@ typedef enum {
 	RegisterPort = 1,
 	UnRegisterPort = 2,
 	ConnectPorts = 3,
-	DisconnectPorts = 4, 
+	DisconnectPorts = 4,
 	SetTimeBaseClient = 5,
 	ActivateClient = 6,
 	DeactivateClient = 7,
@@ -402,7 +403,7 @@ typedef enum {
 } RequestType;
 
 struct _jack_request {
-    
+
     //RequestType type;
     uint32_t type;
     union {
@@ -452,7 +453,7 @@ struct _jack_request {
 	    char path[PATH_MAX+1];
 	    char init[JACK_LOAD_INIT_LIMIT];
 	} POST_PACKED_STRUCTURE intclient;
-        struct { 
+        struct {
                 jack_property_change_t change;
                 jack_uuid_t uuid;
                 size_t keylen;
@@ -493,7 +494,7 @@ typedef struct _jack_client_internal {
     int      error;
 
     int		session_reply_pending;
-    
+
 #ifdef JACK_USE_MACH_THREADS
     /* specific resources for server/client real-time thread communication */
     mach_port_t serverport;
@@ -501,7 +502,7 @@ typedef struct _jack_client_internal {
     int running;
     int portnum;
 #endif /* JACK_USE_MACH_THREADS */
-   
+
     jack_client_t *private_client;
 } jack_client_internal_t;
 
@@ -557,7 +558,7 @@ extern jack_port_t *jack_port_by_name_int (jack_client_t *client,
 extern int jack_port_name_equals (jack_port_shared_t* port, const char* target);
 
 /** Get the size (in bytes) of the data structure used to store
- *  MIDI events internally. 
+ *  MIDI events internally.
  */
 extern size_t jack_midi_internal_event_size ();
 
@@ -575,7 +576,7 @@ extern int jack_client_handle_latency_callback (jack_client_t *client, jack_even
 #include <string.h>
 #define VALGRIND_MEMSET(ptr,val,size) memset ((ptr),(val),(size))
 #else
-#define VALGRIND_MEMSET(ptr,val,size) 
+#define VALGRIND_MEMSET(ptr,val,size)
 #endif
 
 #endif /* __jack_internal_h__ */
