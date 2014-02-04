@@ -31,7 +31,7 @@ To actually perform a test using a client, you need to install : make install in
 */
 
 #include <iostream>
-#include <IIO/IIO.H>
+#include <IIO/IIOThreaded.H>
 
 #include <values.h>
 #define __STDC_FORMAT_MACROS
@@ -40,6 +40,8 @@ extern "C" {
 #include "iio_driver.h"
 #include "engine.h"
 }
+
+#define ELAPSED_TIME(last_time, this_time) {cout<<"time since last time = "<<(uintmax_t)(this_time-*last_time)<<'\n'; *last_time = this_time;}
 
 #define IIO_DEFAULT_CHIP "AD7476A" ///< The default IIO recording chip to look for.
 #define IIO_DEFAULT_READ_FS 1.e6 ///< The default IIO sample rate for the default chip.
@@ -71,8 +73,10 @@ extern "C" {
 //};
 
 static int iio_driver_attach (iio_driver_t *driver, jack_engine_t *engine) {
+    cout<<"iio_driver_attach\n";
+    ELAPSED_TIME(&(driver->debug_last_time), driver->engine->get_microseconds())
     // open the IIO subsystem
-    IIO *iio = static_cast<IIO *>(driver->IIO_devices);
+    IIOThreaded *iio = static_cast<IIOThreaded *>(driver->IIO_devices);
     int ret=iio->open(); // try to open all IIO devices
     if (ret!=NO_ERROR)
         return ret;
@@ -122,6 +126,8 @@ static int iio_driver_attach (iio_driver_t *driver, jack_engine_t *engine) {
 }
 
 static int iio_driver_detach (iio_driver_t *driver, jack_engine_t *engine) {
+    cout<<"iio_driver_detach\n";
+    ELAPSED_TIME(&(driver->debug_last_time), driver->engine->get_microseconds())
     static_cast<IIO *>(driver->IIO_devices)->close(); // close the IIO system
 
     if (driver->engine == 0)
@@ -147,8 +153,19 @@ static int iio_driver_detach (iio_driver_t *driver, jack_engine_t *engine) {
 }
 
 static int iio_driver_start (iio_driver_t *driver) {
-    cout<<"iio_driver_start::   enabling IIO : enable(true)"<<endl;
-    static_cast<IIO *>(driver->IIO_devices)->enable(true); // start the DMA
+    cout<<"iio_driver_start::   enabling IIO : enable(true)\n";
+    ELAPSED_TIME(&(driver->debug_last_time), driver->engine->get_microseconds())
+
+    IIOThreaded *iio = static_cast<IIOThreaded *>(driver->IIO_devices);
+    int ret;
+    if ((ret=iio->run())!=NO_ERROR) // start the reading thread
+        return ret;
+    if ((ret=iio->enable(true))!=NO_ERROR) // start the DMA
+        goto errorStart0;
+    if ((ret=iio->unLock())!=NO_ERROR) // ensure started in an unlocked state
+        goto errorStart1;
+    if ((ret=iio->lock())!=NO_ERROR) // lock so I can't read until unlocked.
+        goto errorStart1;
 
 #ifdef HAVE_CLOCK_GETTIME
     driver->next_wakeup.tv_sec = 0;
@@ -156,25 +173,39 @@ static int iio_driver_start (iio_driver_t *driver) {
     driver->next_time = 0;
 #endif
     return 0;
+errorStart1:
+        iio->enable(false); // stop the DMA
+errorStart0:
+        iio->stop(); // stop the reading thread
+        return ret;
 }
 
 static int iio_driver_stop (iio_driver_t *driver) {
     cout<<"iio_driver_start:: disabling IIO : enable(false)"<<endl;
-    static_cast<IIO *>(driver->IIO_devices)->enable(false); // stop the DMA
+    ELAPSED_TIME(&(driver->debug_last_time), driver->engine->get_microseconds())
+    IIOThreaded *iio = static_cast<IIOThreaded *>(driver->IIO_devices);
+    iio->enable(false); // stop the DMA
+    iio->stop(); // stop the reading thread
+    iio->unLock(); // ensure the mutex is unlocked
+
     return 0;
 }
 
 static int iio_driver_read(iio_driver_t *driver, jack_nframes_t nframes) {
+    cout<<"iio_driver_read\n";
+    ELAPSED_TIME(&(driver->debug_last_time), driver->engine->get_microseconds())
     if (nframes > 0) {
         //cout<<"iio_driver_read nframes = "<<nframes<<"\n";
-        Eigen::Array<unsigned short int, Eigen::Dynamic, Eigen::Dynamic> *data = static_cast<Eigen::Array<unsigned short int, Eigen::Dynamic, Eigen::Dynamic> *>(driver->data);
-        IIO *iio = static_cast<IIO *>(driver->IIO_devices);
+        IIOThreaded *iio = static_cast<IIOThreaded *>(driver->IIO_devices);
         uint devChCnt=(*iio)[0].getChCnt();
 
-        // read from the IIO devices ...
-        int ret=iio->read(nframes, *data);
-        if (ret!=NO_ERROR)
-            return -1;
+//        // read from the IIO devices ...
+//        int ret=iio->read(nframes, *data);
+//        if (ret!=NO_ERROR)
+//            return -1;
+        iio->lock(); // Wait until iio has finished reading this round
+        cout<<" spent "<< (driver->engine->get_microseconds()-driver->debug_last_time)<<" us waiting for lock\n";
+        Eigen::Array<unsigned short int, Eigen::Dynamic, Eigen::Dynamic> *data = iio->getFullBuffer(); // get the buffer which was last filled
 
         // write to the connected capture ports ...
         JSList *node = (JSList *)driver->capture_ports;
@@ -191,6 +222,7 @@ static int iio_driver_read(iio_driver_t *driver, jack_nframes_t nframes) {
                 buf[i]=(*data)(i*devChCnt+chn%devChCnt, chn/devChCnt);
             }
         }
+        cout<<" spent "<< (driver->engine->get_microseconds()-driver->debug_last_time)<<" us waiting for lock and copying data over\n";
     }
     return 0;
 }
@@ -202,7 +234,8 @@ static int iio_driver_write (iio_driver_t *driver, jack_nframes_t nframes) {
 }
 
 static int iio_driver_null_cycle (iio_driver_t *driver, jack_nframes_t nframes) {
-    //cout<<"iio_driver_null_cycle\n";
+    cout<<"iio_driver_null_cycle\n";
+    ELAPSED_TIME(&(driver->debug_last_time), driver->engine->get_microseconds())
 
 // output buffers are currently not handled ... in future, add output handling here.
 
@@ -212,7 +245,8 @@ static int iio_driver_null_cycle (iio_driver_t *driver, jack_nframes_t nframes) 
 /** The driver_wait function to work out if we have used more time then available to process one cycle.
 */
 static jack_nframes_t iio_driver_wait(iio_driver_t *driver, int extra_fd, int *status, float *delayed_usecs) {
-    //cout<<"iio_driver_wait\n";
+    cout<<"iio_driver_wait\n";
+    ELAPSED_TIME(&(driver->debug_last_time), driver->engine->get_microseconds())
     //float maxDelayTime=(IIO_SAFETY_FACTOR*driver->maxDelayUSecs); // this driver can handle this much delay between reads.
     float maxDelayTime=driver->maxDelayUSecs; // this driver can handle this much delay between reads.
     //cout<<"maxDelayTime "<<maxDelayTime<<endl;
@@ -245,13 +279,17 @@ static jack_nframes_t iio_driver_wait(iio_driver_t *driver, int extra_fd, int *s
     driver->last_wait_ust = driver->engine->get_microseconds(); // remember the time now
     driver->engine->transport_cycle_start (driver->engine, driver->last_wait_ust);
 
+    //cout<<"difference = "<<driver->last_wait_ust-now<<"\n";
+
     *delayed_usecs = 0;
     if (xrun) return 0;
     return driver->period_size;
 }
 
 static int iio_driver_run_cycle (iio_driver_t *driver) {
-//    cout<<"iio_driver_run_cycle"<<endl;
+    cout<<"iio_driver_run_cycle"<<endl;
+    ELAPSED_TIME(&(driver->debug_last_time), driver->engine->get_microseconds())
+
     int wait_status;
     float delayed_usecs;
 
@@ -285,6 +323,17 @@ jack_time_t getUSecs(jack_nframes_t nframes, jack_nframes_t fs) {
 */
 static int iio_driver_bufsize (iio_driver_t *driver, jack_nframes_t nframes) {
     cout<<"iio_driver_bufsize"<<endl;
+    ELAPSED_TIME(&(driver->debug_last_time), driver->engine->get_microseconds())
+
+    IIOThreaded *iio = static_cast<IIOThreaded *>(driver->IIO_devices);
+    int newDMABufSize=iio->setChannelBufferCnt(nframes*2); // ensure we have a periods head room
+    cout<<"new DMA Buf. Size ="<<newDMABufSize*(*iio)[0].getChCnt()<<endl;
+
+    driver->maxDelayUSecs=(double)iio->getChannelBufferCnt()/driver->sample_rate*1.e6; // find the duration (in us) each channel can buffer
+
+    if (newDMABufSize!=nframes)
+        return -1;
+
     // Check we aren't exceeding the safety margin for the available DMA buffer ...
     float requestedUS=(float)nframes*(float)driver->sample_rate/1.e6;
     if (requestedUS>(IIO_SAFETY_FACTOR*driver->maxDelayUSecs)) {
@@ -292,20 +341,25 @@ static int iio_driver_bufsize (iio_driver_t *driver, jack_nframes_t nframes) {
         return -1;
     }
 
-    // Check that the read array is large enough to handle nframes and if not, then resize ...
-    Eigen::Array<unsigned short int, Eigen::Dynamic, Eigen::Dynamic> *data = static_cast<Eigen::Array<unsigned short int, Eigen::Dynamic, Eigen::Dynamic> *>(driver->data);
-    IIO *iio = static_cast<IIO *>(driver->IIO_devices);
-    int N=iio->getReadArraySampleCount(*data);
-    if (N<nframes) { // if it is smaller then nframes then resize
-        int ret=iio->getReadArray(driver->period_size, *data); // resize the array to be able to read enough memory
-        if (ret!=NO_ERROR) {
-            jack_info("iio::getReadArray couldn't extend the data buffer, indicating the problem.");
-            return -1;
-        }
+    // resize the input data storage buffers ...
+    int ret=iio->setSampleCountChannelCount(nframes, driver->capture_channels);
+    if (ret!=NO_ERROR) {
+        jack_info("iio::getReadArray couldn't extend the data buffer, indicating the problem.");
+        return -1;
     }
-    // if the data matrix is larger in columns then the number of capture channels, then resize it.
-    if ((int)ceil((float)driver->capture_channels/(float)(*iio)[0].getChCnt())<data->cols())
-        data->resize(data->rows(), (int)ceil((float)driver->capture_channels/(float)(*iio)[0].getChCnt()));
+//    // Check that the read array is large enough to handle nframes and if not, then resize ...
+//    Eigen::Array<unsigned short int, Eigen::Dynamic, Eigen::Dynamic> *data = static_cast<Eigen::Array<unsigned short int, Eigen::Dynamic, Eigen::Dynamic> *>(driver->data);
+//    int N=iio->getReadArraySampleCount(*data);
+//    if (N<nframes) { // if it is smaller then nframes then resize
+//        int ret=iio->getReadArray(driver->period_size, *data); // resize the array to be able to read enough memory
+//        if (ret!=NO_ERROR) {
+//            jack_info("iio::getReadArray couldn't extend the data buffer, indicating the problem.");
+//            return -1;
+//        }
+//    }
+//    // if the data matrix is larger in columns then the number of capture channels, then resize it.
+//    if ((int)ceil((float)driver->capture_channels/(float)(*iio)[0].getChCnt())<data->cols())
+//        data->resize(data->rows(), (int)ceil((float)driver->capture_channels/(float)(*iio)[0].getChCnt()));
 
     // all good, adjust the new variables...
     driver->period_size = nframes;
@@ -314,7 +368,7 @@ static int iio_driver_bufsize (iio_driver_t *driver, jack_nframes_t nframes) {
     cout<<"wait_time = "<<driver->wait_time<<endl;
 
     /* tell the engine to change its buffer size */
-    if (driver->engine->set_buffer_size (driver->engine, nframes)) {
+    if (driver->engine->set_buffer_size(driver->engine, nframes)) {
         jack_error ("iio: cannot set engine buffer size to %d ", nframes);
         return -1;
     }
@@ -326,23 +380,26 @@ static int iio_driver_bufsize (iio_driver_t *driver, jack_nframes_t nframes) {
 */
 static void iio_driver_delete(iio_driver_t * driver) {
     cout<<"iio_driver_delete"<<endl;
-    IIO *iio = static_cast<IIO *>(driver->IIO_devices);
+    ELAPSED_TIME(&(driver->debug_last_time), driver->engine->get_microseconds())
+
+    IIOThreaded *iio = static_cast<IIOThreaded *>(driver->IIO_devices);
     if (iio)
         delete iio;
     driver->IIO_devices=NULL;
-    Eigen::Array<unsigned short int, Eigen::Dynamic, Eigen::Dynamic> *data = static_cast<Eigen::Array<unsigned short int, Eigen::Dynamic, Eigen::Dynamic> *>(driver->data);
-    if (data)
-        delete data;
-    driver->data=NULL;
+//    Eigen::Array<unsigned short int, Eigen::Dynamic, Eigen::Dynamic> *data = static_cast<Eigen::Array<unsigned short int, Eigen::Dynamic, Eigen::Dynamic> *>(driver->data);
+//    if (data)
+//        delete data;
+//    driver->data=NULL;
     free(driver);
 }
 
 jack_driver_t *driver_initialize (jack_client_t *client, const JSList * params) {
     cout<<"driver_initialize "<<endl;
-    IIO *iio = NULL;
+
+    IIOThreaded *iio = NULL;
     iio_driver_t *driver = (iio_driver_t *) calloc (1, sizeof (iio_driver_t));
     driver->IIO_devices=NULL; // indicate that the iio class hasn't been created yet
-    driver->data=NULL; // indicate that the iio data matrix hasn't been created yet.
+    //driver->data=NULL; // indicate that the iio data matrix hasn't been created yet.
 
     if (driver) {
         jack_driver_nt_init((jack_driver_nt_t *) driver);
@@ -369,7 +426,7 @@ jack_driver_t *driver_initialize (jack_client_t *client, const JSList * params) 
         driver->playback_channels = 0; // currently doesn't support playback.
         driver->playback_ports    = NULL;
 
-        iio = new IIO; // initialise the IIO system.
+        iio = new IIOThreaded; // initialise the IIO system.
         if (iio) { // if the IIO class was successfully created ...
             driver->IIO_devices=static_cast<void*>(iio); // store the iio class in the C structure
 
@@ -398,6 +455,9 @@ jack_driver_t *driver_initialize (jack_client_t *client, const JSList * params) 
 
             iio->printInfo(); // print out detail about the devices which were found ...
 
+            int newDMABufSize=iio->setChannelBufferCnt(driver->period_size*2); // ensure we have a periods head room
+            cout<<"new DMA Buf. Size ="<<newDMABufSize*(*iio)[0].getChCnt()<<endl;
+
             // Find the maximum allowable delay and check whether the desired period is within the limit, otherwise report the error.
             driver->period_usecs = driver->wait_time = getUSecs(driver->period_size, driver->sample_rate);
             driver->maxDelayUSecs=(double)iio->getChannelBufferCnt()/driver->sample_rate*1.e6; // find the duration (in us) each channel can buffer
@@ -413,30 +473,37 @@ jack_driver_t *driver_initialize (jack_client_t *client, const JSList * params) 
                 bufferSizeOK=false; // indicate the error
             }
 
-            // Try to create the data buffer and store it in the driver, if a problem is encountered, then report the error.
-            bool dataCreationOK=true;
-            Eigen::Array<unsigned short int, Eigen::Dynamic, Eigen::Dynamic> *data = new Eigen::Array<unsigned short int, Eigen::Dynamic, Eigen::Dynamic>;
-            if (data) {
-                driver->data=data;
-                int ret=iio->getReadArray(driver->period_size, *data); // resize the array to be able to read enough memory
-                if (ret!=NO_ERROR) {
-                    jack_info("iio::getReadArray couldn't create the data buffer, indicating the problem.");
-                    dataCreationOK=false;
-                }
-            } else {
-                jack_info("iio driver couldn't create the data buffer, indicating the problem.");
-                dataCreationOK=false;
-            }
 
             // if the available number of ports is less then the requested number, then restrict to the number of physical ports.
             if (iio->getChCnt()<driver->capture_channels)
                 driver->capture_channels=iio->getChCnt();
 
-            // if the data matrix is larger in columns then the number of capture channels, then resize it.
-            if ((int)ceil((float)driver->capture_channels/(float)(*iio)[0].getChCnt())<data->cols())
-                data->resize(data->rows(), (int)ceil((float)driver->capture_channels/(float)(*iio)[0].getChCnt()));
-
-            cout<<"matrix size rows = "<<data->rows()<<" cols = "<<data->cols()<<endl;
+            // Try to create the data buffer and store it in the driver, if a problem is encountered, then report the error.
+            bool dataCreationOK=true;
+            // resize the input data storage buffers ...
+            int ret=iio->setSampleCountChannelCount(driver->period_size, driver->capture_channels);
+            if (ret!=NO_ERROR) {
+                jack_info("iio driver couldn't create the data buffer, indicating the problem.");
+                dataCreationOK=false;
+            }
+//            Eigen::Array<unsigned short int, Eigen::Dynamic, Eigen::Dynamic> *data = new Eigen::Array<unsigned short int, Eigen::Dynamic, Eigen::Dynamic>;
+//            if (data) {
+//                driver->data=data;
+//                int ret=iio->getReadArray(driver->period_size, *data); // resize the array to be able to read enough memory
+//                if (ret!=NO_ERROR) {
+//                    jack_info("iio::getReadArray couldn't create the data buffer, indicating the problem.");
+//                    dataCreationOK=false;
+//                }
+//            } else {
+//                jack_info("iio driver couldn't create the data buffer, indicating the problem.");
+//                dataCreationOK=false;
+//            }
+//
+//            // if the data matrix is larger in columns then the number of capture channels, then resize it.
+//            if ((int)ceil((float)driver->capture_channels/(float)(*iio)[0].getChCnt())<data->cols())
+//                data->resize(data->rows(), (int)ceil((float)driver->capture_channels/(float)(*iio)[0].getChCnt()));
+//
+//            cout<<"matrix size rows = "<<data->rows()<<" cols = "<<data->cols()<<endl;
 
             string name("iio_pcm");
             if ((driver->capture_channels!=0 || driver->playback_channels!=0) && bufferSizeOK && dataCreationOK) {
@@ -498,6 +565,7 @@ jack_driver_desc_t *driver_get_descriptor () {
 
 void driver_finish (jack_driver_t *driver) {
     cout<<"driver_finish"<<endl;
+
     iio_driver_delete((iio_driver_t *) driver);
 }
 

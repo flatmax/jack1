@@ -60,11 +60,12 @@ typedef struct _iio_driver {
 #else
     jack_time_t     next_time;
     jack_time_t     last_xrun_time;
+    jack_time_t     debug_last_time;
 #endif
 
     void *IIO_devices; ///< The IIO C++ class maintaining all devices with a particular chip name.
     float maxDelayUSecs; ///< The maximum number of micro seconds the buffer can hold
-    void *data; ///< The data read in from the IIO devices is stored here.
+    //void *data; ///< The data read in from the IIO devices is stored here.
 } iio_driver_t;
 
 /** Function called by jack to init. the IIO driver, possibly passing in variables.
