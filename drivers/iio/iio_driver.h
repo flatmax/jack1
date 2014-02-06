@@ -35,7 +35,7 @@ typedef struct _iio_driver {
     JACK_DRIVER_NT_DECL;
 
 	jack_nframes_t period_size;
-//	unsigned int nperiods;
+	unsigned int nperiods;
 	unsigned int capture_channels;
 	unsigned int playback_channels;
 
@@ -60,6 +60,7 @@ typedef struct _iio_driver {
 #else
     jack_time_t     next_time;
     jack_time_t     last_xrun_time;
+    jack_time_t     debug_last_time;
 #endif
 
     void *IIO_devices; ///< The IIO C++ class maintaining all devices with a particular chip name.

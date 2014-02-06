@@ -35,7 +35,7 @@ typedef enum {
 
 typedef int16_t jack_shm_registry_index_t;
 
-/** 
+/**
  * A structure holding information about shared memory allocated by
  * JACK. this persists across invocations of JACK, and can be used by
  * multiple JACK servers.  It contains no pointers and is valid across
@@ -69,7 +69,7 @@ typedef struct _jack_shm_registry {
 #define JACK_SHM_REGISTRY_SIZE (sizeof (jack_shm_header_t) \
 				+ sizeof (jack_shm_registry_t) * MAX_SHM_ID)
 
-/** 
+/**
  * a structure holding information about shared memory
  * allocated by JACK. this version is valid only
  * for a given address space. It contains a pointer
@@ -83,14 +83,14 @@ typedef struct _jack_shm_info {
 
 /* utility functions used only within JACK */
 
-extern void jack_shm_copy_from_registry (jack_shm_info_t*, 
+extern void jack_shm_copy_from_registry (jack_shm_info_t*,
 					 jack_shm_registry_index_t);
 extern void jack_shm_copy_to_registry (jack_shm_info_t*,
 				       jack_shm_registry_index_t*);
 extern void jack_release_shm_info (jack_shm_registry_index_t);
 
 static inline char* jack_shm_addr (jack_shm_info_t* si) {
-	return si->attached_at;
+	return (char*)si->attached_at;
 }
 
 /* here beginneth the API */

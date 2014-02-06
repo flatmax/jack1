@@ -18,5 +18,5 @@ noinst_PROGRAMS = JackIIODriverTest
 
 JackIIODriverTest_SOURCES = JackIIODriverTest.C
 JackIIODriverTest_CPPFLAGS = $(GTKIOSTREAM_CFLAGS) $(JACK_CFLAGS)
-JackIIODriverTest_LDADD = $(top_builddir)/libjack/libjack.la
+JackIIODriverTest_LDADD = $(top_builddir)/libjack/libjack.la $(GTKIOSTREAM_LIBS)
 
