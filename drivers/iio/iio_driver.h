@@ -35,7 +35,7 @@ typedef struct _iio_driver {
     JACK_DRIVER_NT_DECL;
 
 	jack_nframes_t period_size;
-//	unsigned int nperiods;
+	unsigned int nperiods;
 	unsigned int capture_channels;
 	unsigned int playback_channels;
 
@@ -65,7 +65,7 @@ typedef struct _iio_driver {
 
     void *IIO_devices; ///< The IIO C++ class maintaining all devices with a particular chip name.
     float maxDelayUSecs; ///< The maximum number of micro seconds the buffer can hold
-    //void *data; ///< The data read in from the IIO devices is stored here.
+    void *data; ///< The data read in from the IIO devices is stored here.
 } iio_driver_t;
 
 /** Function called by jack to init. the IIO driver, possibly passing in variables.
