@@ -30,6 +30,8 @@ JACK_DRIVER_DIR=/home/flatmax/jack1/drivers/iio/.libs ./jackd/.libs/jackd -r -d 
 To actually perform a test using a client, you need to install : make install in the topsrc dir.
 */
 
+#define DEBUG_LOCAL_OUTPUT
+
 #include <iostream>
 #include <IIO/IIOMMap.H>
 
@@ -74,7 +76,7 @@ extern "C" {
 //};
 
 static int iio_driver_attach (iio_driver_t *driver, jack_engine_t *engine) {
-    Debugger<<"iio_driver_attach\n";
+    DebuggerLocal<<"iio_driver_attach\n";
     ELAPSED_TIME(&(driver->debug_last_time), driver->engine->get_microseconds())
     // open the IIO subsystem
     IIOMMap *iio = static_cast<IIOMMap *>(driver->IIO_devices);
@@ -148,7 +150,7 @@ static int iio_driver_attach (iio_driver_t *driver, jack_engine_t *engine) {
 }
 
 static int iio_driver_detach (iio_driver_t *driver, jack_engine_t *engine) {
-    Debugger<<"iio_driver_detach\n";
+    DebuggerLocal<<"iio_driver_detach\n";
     ELAPSED_TIME(&(driver->debug_last_time), driver->engine->get_microseconds())
     IIOMMap *iio = static_cast<IIOMMap *>(driver->IIO_devices);
     iio->enable(false); // stop the DMA
@@ -177,7 +179,7 @@ static int iio_driver_detach (iio_driver_t *driver, jack_engine_t *engine) {
 }
 
 static int iio_driver_start (iio_driver_t *driver) {
-    Debugger<<"iio_driver_start::   enabling IIO : enable(true)\n";
+    DebuggerLocal<<"iio_driver_start::   enabling IIO : enable(true)\n";
     ELAPSED_TIME(&(driver->debug_last_time), driver->engine->get_microseconds())
 
     IIOMMap *iio = static_cast<IIOMMap *>(driver->IIO_devices);
@@ -195,7 +197,7 @@ static int iio_driver_start (iio_driver_t *driver) {
 }
 
 static int iio_driver_stop (iio_driver_t *driver) {
-    Debugger<<"iio_driver_start:: disabling IIO : enable(false)"<<endl;
+    DebuggerLocal<<"iio_driver_start:: disabling IIO : enable(false)"<<endl;
     ELAPSED_TIME(&(driver->debug_last_time), driver->engine->get_microseconds())
     IIOMMap *iio = static_cast<IIOMMap *>(driver->IIO_devices);
     iio->enable(false); // stop the DMA
@@ -248,16 +250,29 @@ static int iio_driver_read(iio_driver_t *driver, jack_nframes_t nframes) {
 }
 
 static int iio_driver_write (iio_driver_t *driver, jack_nframes_t nframes) {
-    if (nframes>0)
+    if (nframes>0){
         Debugger<<"iio_driver_write nframes = "<<nframes<<"\n";
+    }
     return 0;
 }
 
 static int iio_driver_null_cycle (iio_driver_t *driver, jack_nframes_t nframes) {
-    Debugger<<"iio_driver_null_cycle\n";
+    //DebuggerLocal<<"iio_driver_null_cycle\n";
     ELAPSED_TIME(&(driver->debug_last_time), driver->engine->get_microseconds())
 
-// output buffers are currently not handled ... in future, add output handling here.
+    if (nframes>0){
+        IIOMMap *iio = static_cast<IIOMMap *>(driver->IIO_devices);
+        uint devChCnt=(*iio)[0].getChCnt();
+
+        // read from the IIO devices ...
+        // Ret the data array pointer to use for reading.
+        Eigen::Array<unsigned short int, Eigen::Dynamic, Eigen::Dynamic> *data = static_cast<Eigen::Array<unsigned short int, Eigen::Dynamic, Eigen::Dynamic> *>(driver->data);
+        int ret=iio->read(nframes, *data);
+        if (ret!=NO_ERROR)
+            return -1;
+
+        // output buffers are currently not handled ... in future, add output handling here.
+    }
 
     return 0;
 }
@@ -342,7 +357,7 @@ jack_time_t getUSecs(jack_nframes_t nframes, jack_nframes_t fs) {
 /**
 */
 static int iio_driver_bufsize (iio_driver_t *driver, jack_nframes_t nframes) {
-    Debugger<<"iio_driver_bufsize"<<endl;
+    DebuggerLocal<<"iio_driver_bufsize"<<endl;
     ELAPSED_TIME(&(driver->debug_last_time), driver->engine->get_microseconds())
 
     IIOMMap *iio = static_cast<IIOMMap *>(driver->IIO_devices);
@@ -453,7 +468,7 @@ static int iio_driver_bufsize (iio_driver_t *driver, jack_nframes_t nframes) {
 /** free all memory allocated by a driver instance
 */
 static void iio_driver_delete(iio_driver_t * driver) {
-    Debugger<<"iio_driver_delete"<<endl;
+    DebuggerLocal<<"iio_driver_delete"<<endl;
     ELAPSED_TIME(&(driver->debug_last_time), driver->engine->get_microseconds())
 
     IIOMMap *iio = static_cast<IIOMMap *>(driver->IIO_devices);
@@ -468,7 +483,7 @@ static void iio_driver_delete(iio_driver_t * driver) {
 }
 
 jack_driver_t *driver_initialize (jack_client_t *client, const JSList * params) {
-    Debugger<<"driver_initialize "<<endl;
+    DebuggerLocal<<"driver_initialize "<<endl;
 
     IIOMMap *iio = NULL;
     iio_driver_t *driver = (iio_driver_t *) calloc (1, sizeof (iio_driver_t));
@@ -528,7 +543,15 @@ jack_driver_t *driver_initialize (jack_client_t *client, const JSList * params) 
                 pnode = jack_slist_next(pnode);
             }
 
-            iio->findDevicesByChipName(chipName); // find all devices with a particular chip which are present.
+            if (iio->findDevicesByChipName(chipName)!=NO_ERROR){ // find all devices with a particular chip which are present.
+                jack_info("\nThe iio driver found no devices by the name %s\n", chipName.c_str());
+                return NULL;
+            }
+
+            if (iio->getDeviceCnt()<1){ // If there are no devices found by that chip name, then indicate.
+                jack_info("\nThe iio driver found no devices by the name %s\n", chipName.c_str());
+                return NULL;
+            }
 
             iio->printInfo(); // print out detail about the devices which were found ...
 
@@ -640,7 +663,7 @@ jack_driver_desc_t *driver_get_descriptor () {
 }
 
 void driver_finish (jack_driver_t *driver) {
-    Debugger<<"driver_finish"<<endl;
+    DebuggerLocal<<"driver_finish"<<endl;
 
     iio_driver_delete((iio_driver_t *) driver);
 }
