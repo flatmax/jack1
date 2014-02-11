@@ -66,3 +66,4 @@ tools/jack_thread_wait
 tools/jack_transport
 tools/jack_unload
 tools/jackrec
+JackIIODriverTest

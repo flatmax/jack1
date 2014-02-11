@@ -247,6 +247,46 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="../drivers/sun/sun_driver.h" />
+		<Unit filename="../example-clients/Makefile.am" />
+		<Unit filename="../example-clients/capture_client.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../example-clients/impulse_grabber.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../example-clients/inprocess.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../example-clients/intime.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../example-clients/latent_client.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../example-clients/metro.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../example-clients/midiseq.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../example-clients/midisine.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../example-clients/server_control.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../example-clients/showtime.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../example-clients/simple_client.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../example-clients/simple_session_client.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../example-clients/transport_client.c">
+			<Option compilerVar="CC" />
+		</Unit>
 		<Unit filename="../include/Makefile.am" />
 		<Unit filename="../include/atomicity.h" />
 		<Unit filename="../include/bitset.h" />

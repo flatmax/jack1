@@ -2,19 +2,19 @@
 /*
     Copyright (C) 2001-2003 Paul Davis
     Copyright (C) 2005 Jussi Laako
-    
+
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU Lesser General Public License as published by
     the Free Software Foundation; either version 2.1 of the License, or
     (at your option) any later version.
-    
+
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU Lesser General Public License for more details.
-    
+
     You should have received a copy of the GNU Lesser General Public License
-    along with this program; if not, write to the Free Software 
+    along with this program; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 */
@@ -148,9 +148,9 @@ jack_get_tmpdir ()
 		char command[PATH_MAX+4];
 
 		snprintf (jackd, sizeof (jackd), "%s/jackd", p);
-		
+
 		if (access (jackd, X_OK) == 0) {
-			
+
 			snprintf (command, sizeof (command), "%s -l", jackd);
 
 			if ((in = popen (command, "r")) != NULL) {
@@ -189,14 +189,14 @@ jack_get_tmpdir ()
 
 	memcpy (jack_tmpdir, buf, len-1);
 	jack_tmpdir[len-1] = '\0';
-	
+
 	fclose (in);
 	free (pathcopy);
 
 	return 0;
 }
 
-void 
+void
 jack_error (const char *fmt, ...)
 {
 	va_list ap;
@@ -208,21 +208,21 @@ jack_error (const char *fmt, ...)
 	va_end (ap);
 }
 
-void 
+void
 default_jack_error_callback (const char *desc)
 {
 	fprintf(stderr, "%s\n", desc);
 	fflush(stderr);
 }
 
-void 
+void
 default_jack_info_callback (const char *desc)
 {
 	fprintf(stdout, "%s\n", desc);
 	fflush(stdout);
 }
 
-void 
+void
 silent_jack_error_callback (const char *desc)
 {
 }
@@ -230,7 +230,7 @@ silent_jack_error_callback (const char *desc)
 void (*jack_error_callback)(const char *desc) = &default_jack_error_callback;
 void (*jack_info_callback)(const char *desc) = &default_jack_info_callback;
 
-void 
+void
 jack_info (const char *fmt, ...)
 {
 	va_list ap;
@@ -253,7 +253,7 @@ oop_client_deliver_request (void *ptr, jack_request_t *req)
 
         /* if necessary, add variable length key data after a PropertyChange request
          */
-        
+
         if (req->type == PropertyChangeNotify) {
                 if (req->x.property.keylen) {
                         if (write (client->request_fd, req->x.property.key, req->x.property.keylen) != req->x.property.keylen) {
@@ -299,7 +299,7 @@ jack_client_deliver_request (const jack_client_t *client, jack_request_t *req)
 	return client->deliver_request (client->deliver_arg, req);
 }
 
-#if JACK_USE_MACH_THREADS 
+#if JACK_USE_MACH_THREADS
 
 jack_client_t *
 jack_client_alloc ()
@@ -392,7 +392,7 @@ jack_client_alloc_internal (jack_client_control_t *cc, jack_engine_t* engine)
 
 	client->control = cc;
 	client->engine = engine->control;
-	
+
 	client->n_port_types = client->engine->n_port_types;
 	client->port_segment = &engine->port_segment[0];
 
@@ -426,7 +426,7 @@ jack_client_fix_port_buffers (jack_client_t *client)
 
 		if (port->shared->flags & JackPortIsInput) {
 			if (port->mix_buffer) {
-				size_t buffer_size = 
+				size_t buffer_size =
 					jack_port_type_buffer_size( port->type_info,
 								    client->engine->buffer_size );
 				jack_pool_release (port->mix_buffer);
@@ -434,8 +434,8 @@ jack_client_fix_port_buffers (jack_client_t *client)
 				pthread_mutex_lock (&port->connection_lock);
 				if (jack_slist_length (port->connections) > 1) {
 					port->mix_buffer = jack_pool_alloc (buffer_size);
-					port->fptr.buffer_init (port->mix_buffer, 
-								buffer_size, 
+					port->fptr.buffer_init (port->mix_buffer,
+								buffer_size,
 								client->engine->buffer_size);
 				}
 				pthread_mutex_unlock (&port->connection_lock);
@@ -451,7 +451,7 @@ jack_client_handle_port_connection (jack_client_t *client, jack_event_t *event)
 	jack_port_t *other = 0;
 	JSList *node;
 	int need_free = FALSE;
-        
+
 	if (jack_uuid_compare (client->engine->ports[event->x.self_id].client_id, client->control->uuid) == 0 ||
 	    jack_uuid_compare (client->engine->ports[event->y.other_id].client_id, client->control->uuid) == 0) {
 
@@ -462,21 +462,21 @@ jack_client_handle_port_connection (jack_client_t *client, jack_event_t *event)
 			other = jack_port_new (client, event->y.other_id,
 					       client->engine);
 			/* jack_port_by_id_int() always returns an internal
-			 * port that does not need to be deallocated 
+			 * port that does not need to be deallocated
 			 */
 			control_port = jack_port_by_id_int (client, event->x.self_id,
 							    &need_free);
 			pthread_mutex_lock (&control_port->connection_lock);
 
 			if ((control_port->shared->flags & JackPortIsInput)
-			 && (control_port->connections != NULL) 
+			 && (control_port->connections != NULL)
 			 && (control_port->mix_buffer == NULL)  ) {
-				size_t buffer_size = 
+				size_t buffer_size =
 					jack_port_type_buffer_size( control_port->type_info,
 								    client->engine->buffer_size );
 				control_port->mix_buffer = jack_pool_alloc (buffer_size);
-				control_port->fptr.buffer_init (control_port->mix_buffer, 
-								buffer_size, 
+				control_port->fptr.buffer_init (control_port->mix_buffer,
+								buffer_size,
 								client->engine->buffer_size);
 			}
 
@@ -485,18 +485,18 @@ jack_client_handle_port_connection (jack_client_t *client, jack_event_t *event)
 						    (void *) other);
 			pthread_mutex_unlock (&control_port->connection_lock);
 			break;
-			
+
 		case PortDisconnected:
 			/* jack_port_by_id_int() always returns an internal
-			 * port that does not need to be deallocated 
+			 * port that does not need to be deallocated
 			 */
 			control_port = jack_port_by_id_int (client, event->x.self_id,
 							    &need_free);
 			pthread_mutex_lock (&control_port->connection_lock);
-			
+
 			for (node = control_port->connections; node;
 			     node = jack_slist_next (node)) {
-				
+
 				other = (jack_port_t *) node->data;
 
 				if (other->shared->id == event->y.other_id) {
@@ -509,10 +509,10 @@ jack_client_handle_port_connection (jack_client_t *client, jack_event_t *event)
 					break;
 				}
 			}
-			
+
 			pthread_mutex_unlock (&control_port->connection_lock);
 			break;
-			
+
 		default:
 			/* impossible */
 			break;
@@ -521,7 +521,7 @@ jack_client_handle_port_connection (jack_client_t *client, jack_event_t *event)
 
 	if (client->control->port_connect_cbset) {
 		client->port_connect (event->x.self_id, event->y.other_id,
-					       (event->type == PortConnected ? 1 : 0), 
+					       (event->type == PortConnected ? 1 : 0),
 					       client->port_connect_arg);
 	}
 
@@ -683,15 +683,15 @@ jack_client_handle_latency_callback (jack_client_t *client, jack_event_t *event,
 	/* we have a latency callback setup by the client,
 	 * lets use it...
 	 */
-	client->latency_cb ( mode, client->latency_cb_arg);
+//	client->latency_cb ( mode, client->latency_cb_arg);
 	return 0;
 }
 
 #if JACK_USE_MACH_THREADS
 
-static int 
+static int
 jack_handle_reorder (jack_client_t *client, jack_event_t *event)
-{	
+{
 	client->pollmax = 1;
 
 	/* If the client registered its own callback for graph order events,
@@ -707,9 +707,9 @@ jack_handle_reorder (jack_client_t *client, jack_event_t *event)
 
 #else
 
-static int 
+static int
 jack_handle_reorder (jack_client_t *client, jack_event_t *event)
-{	
+{
 	char path[PATH_MAX+1];
 
 	DEBUG ("graph reorder\n");
@@ -718,7 +718,7 @@ jack_handle_reorder (jack_client_t *client, jack_event_t *event)
 		DEBUG ("closing graph_wait_fd==%d", client->graph_wait_fd);
 		close (client->graph_wait_fd);
 		client->graph_wait_fd = -1;
-	} 
+	}
 
 	if (client->graph_next_fd >= 0) {
 		DEBUG ("closing graph_next_fd==%d", client->graph_next_fd);
@@ -727,7 +727,7 @@ jack_handle_reorder (jack_client_t *client, jack_event_t *event)
 	}
 
 	sprintf (path, "%s-%" PRIu32, client->fifo_prefix, event->x.n);
-	
+
 	if ((client->graph_wait_fd = open (path, O_RDONLY|O_NONBLOCK)) < 0) {
 		jack_error ("cannot open specified fifo [%s] for reading (%s)",
 			    path, strerror (errno));
@@ -736,7 +736,7 @@ jack_handle_reorder (jack_client_t *client, jack_event_t *event)
 	DEBUG ("opened new graph_wait_fd %d (%s)", client->graph_wait_fd, path);
 
 	sprintf (path, "%s-%" PRIu32, client->fifo_prefix, event->x.n+1);
-	
+
 	if ((client->graph_next_fd = open (path, O_WRONLY|O_NONBLOCK)) < 0) {
 		jack_error ("cannot open specified fifo [%s] for writing (%s)",
 			    path, strerror (errno));
@@ -747,7 +747,7 @@ jack_handle_reorder (jack_client_t *client, jack_event_t *event)
 	client->pollmax = 2;
 
 	DEBUG ("opened new graph_next_fd %d (%s) (upstream is jackd? %d)",
-	       client->graph_next_fd, path, 
+	       client->graph_next_fd, path,
 	       client->upstream_is_jackd);
 
 	/* If the client registered its own callback for graph order events,
@@ -762,7 +762,7 @@ jack_handle_reorder (jack_client_t *client, jack_event_t *event)
 }
 
 #endif
-		
+
 static int
 server_connect (const char *server_name)
 {
@@ -908,12 +908,12 @@ _start_server (const char *server_name)
 	if ((argv = (char **) malloc (255)) == NULL) {
 		goto failure;
 	}
-  
+
 	while(1) {
 		/* insert -T and -nserver_name in front of arguments */
 		if (i == 1) {
 			argv[i] = (char *) malloc(strlen ("-T") + 1);
-			strcpy (argv[i++], "-T"); 
+			strcpy (argv[i++], "-T");
 			if (server_name) {
 				size_t optlen = strlen ("-n");
 				char *buf =
@@ -1027,7 +1027,7 @@ jack_request_client (ClientType type,
 			    va->load_init, sizeof (req.object_data) - 1);
 		return -1;
 	}
-	
+
 	if ((*req_fd = server_connect (va->server_name)) < 0) {
 		int trys;
 		if (start_server(va->server_name, options)) {
@@ -1080,14 +1080,14 @@ jack_request_client (ClientType type,
 			*status |= (JackFailure|JackServerError);
 			goto fail;
 		}
-		
+
 		if (errno == ECONNRESET) {
 			jack_error ("could not attach as JACK client "
 				    "(server has exited)");
 			*status |= (JackFailure|JackServerError);
 			goto fail;
 		}
-		
+
 		jack_error ("cannot read response from jack server (%s)",
 			    strerror (errno));
 		*status |= (JackFailure|JackServerError);
@@ -1132,7 +1132,7 @@ int
 jack_attach_port_segment (jack_client_t *client, jack_port_type_id_t ptid)
 {
 	/* Lookup, attach and register the port/buffer segments in use
-	 * right now. 
+	 * right now.
 	 */
 
 	if (client->control->type != ClientExternal) {
@@ -1145,16 +1145,16 @@ jack_attach_port_segment (jack_client_t *client, jack_port_type_id_t ptid)
 	*/
 
 	if (ptid >= client->n_port_types) {
-		
+
 		client->port_segment = (jack_shm_info_t*)
 			realloc (client->port_segment,
 				 sizeof (jack_shm_info_t) * (ptid+1));
 
 		memset (&client->port_segment[client->n_port_types],
 			0,
-			sizeof (jack_shm_info_t) * 
+			sizeof (jack_shm_info_t) *
 			(ptid - client->n_port_types));
-		
+
 		client->n_port_types = ptid + 1;
 
 	} else {
@@ -1195,7 +1195,7 @@ jack_client_open_aux (const char *client_name,
 	jack_status_t my_status;
 
 	jack_messagebuffer_init ();
-	
+
 	if (status == NULL)		/* no status from caller? */
 		status = &my_status;	/* use local status word */
 	*status = 0;
@@ -1257,7 +1257,7 @@ jack_client_open_aux (const char *client_name,
 			    " segment");
 		goto fail;
 	}
-	
+
 	client->engine = (jack_control_t *) jack_shm_addr (&client->engine_shm);
 
 	/* initialize clock source as early as possible */
@@ -1270,7 +1270,7 @@ jack_client_open_aux (const char *client_name,
 			    " segment");
 		goto fail;
 	}
-	
+
 	client->control = (jack_client_control_t *)
 		jack_shm_addr (&client->control_shm);
 
@@ -1284,7 +1284,7 @@ jack_client_open_aux (const char *client_name,
 	if ((client->port_segment = (jack_shm_info_t *) malloc (sizeof (jack_shm_info_t) * client->n_port_types)) == NULL) {
 		goto fail;
 	}
-	
+
 	for (ptid = 0; ptid < client->n_port_types; ++ptid) {
 		client->port_segment[ptid].index =
 			client->engine->port_types[ptid].shm_registry_index;
@@ -1295,7 +1295,7 @@ jack_client_open_aux (const char *client_name,
 	}
 
 	/* set up the client so that it does the right thing for an
-	 * external client 
+	 * external client
 	 */
 	client->deliver_request = oop_client_deliver_request;
 	client->deliver_arg = client;
@@ -1305,24 +1305,24 @@ jack_client_open_aux (const char *client_name,
 	}
 
 	client->event_fd = ev_fd;
-        
+
 #ifdef JACK_USE_MACH_THREADS
         /* specific resources for server/client real-time thread
 	 * communication */
 	client->clienttask = mach_task_self();
-        
+
 	if (task_get_bootstrap_port(client->clienttask, &client->bp)){
             jack_error ("Can't find bootstrap port");
             goto fail;
         }
-        
+
         if (allocate_mach_clientport(client, res.portnum) < 0) {
             jack_error("Can't allocate mach port");
-            goto fail; 
-        }; 
+            goto fail;
+        };
 #endif /* JACK_USE_MACH_THREADS */
  	return client;
-	
+
   fail:
 	jack_messagebuffer_exit ();
 
@@ -1446,7 +1446,7 @@ jack_internal_client_close (const char *client_name)
 
 	req.load = FALSE;
 	snprintf (req.name, sizeof (req.name), "%s", client_name);
-	
+
 	if ((fd = server_connect (server_name)) < 0) {
 		return;
 	}
@@ -1457,7 +1457,7 @@ jack_internal_client_close (const char *client_name)
 	}
 
 	/* no response to this request */
-	
+
 	close (fd);
 	return;
 }
@@ -1500,7 +1500,7 @@ jack_session_reply (jack_client_t *client, jack_session_event_t *event )
 	int retval = 0;
 
 	if (event->command_line) {
-		snprintf ((char *)client->control->session_command, 
+		snprintf ((char *)client->control->session_command,
 				sizeof(client->control->session_command),
 				"%s", event->command_line);
 		client->control->session_flags = event->flags;
@@ -1565,18 +1565,18 @@ jack_session_notify (jack_client_t* client, const char *target, jack_session_eve
         VALGRIND_MEMSET (&request, 0, sizeof (request));
 
 	request.type = SessionNotify;
-	if( path ) 
+	if( path )
 		snprintf( request.x.session.path, sizeof( request.x.session.path ), "%s", path );
 	else
 		request.x.session.path[0] = '\0';
 
-	if( target ) 
+	if( target )
 		snprintf( request.x.session.target, sizeof( request.x.session.target ), "%s", target );
 	else
 		request.x.session.target[0] = '\0';
 
 	request.x.session.type = code;
-	
+
 	if( (write (client->request_fd, &request, sizeof (request))
 	       != sizeof (request)) ) {
 		jack_error ("cannot send request type %d to server",
@@ -1608,7 +1608,7 @@ jack_session_notify (jack_client_t* client, const char *target, jack_session_eve
 			break;
                 }
 
-		if (read (client->request_fd, (char *)retval[num_replies-1].client_name, JACK_CLIENT_NAME_SIZE) 
+		if (read (client->request_fd, (char *)retval[num_replies-1].client_name, JACK_CLIENT_NAME_SIZE)
 			       	!= JACK_CLIENT_NAME_SIZE) {
 			jack_error ("cannot read result for request type %d from"
 					" server (%s)", request.type, strerror (errno));
@@ -1660,7 +1660,7 @@ jack_start_freewheel (jack_client_t* client)
 	jack_client_control_t *control = client->control;
 
 	if (client->engine->real_time) {
-#if JACK_USE_MACH_THREADS 
+#if JACK_USE_MACH_THREADS
 		jack_drop_real_time_scheduling (client->process_thread);
 #else
 		jack_drop_real_time_scheduling (client->thread);
@@ -1678,11 +1678,11 @@ jack_stop_freewheel (jack_client_t* client)
 	jack_client_control_t *control = client->control;
 
 	if (client->engine->real_time) {
-#if JACK_USE_MACH_THREADS 
+#if JACK_USE_MACH_THREADS
 		jack_acquire_real_time_scheduling (client->process_thread,
 				client->engine->client_priority);
 #else
-		jack_acquire_real_time_scheduling (client->thread, 
+		jack_acquire_real_time_scheduling (client->thread,
 				client->engine->client_priority);
 #endif
 	}
@@ -1709,7 +1709,7 @@ jack_client_thread_suicide (jack_client_t* client, const char* reason)
 		jack_error ("jack_client_thread: %s - exiting from JACK", reason);
 		jack_client_close_aux (client);
 		/* Need a fix : possibly make client crash if
-		 * zombified without shutdown handler 
+		 * zombified without shutdown handler
 		 */
 	}
 
@@ -1730,13 +1730,13 @@ jack_client_process_events (jack_client_t* client)
 	DEBUG ("process events");
 
 	if (client->pollfd[EVENT_POLL_INDEX].revents & POLLIN) {
-		
+
 		DEBUG ("client receives an event, "
 		       "now reading on event fd");
-                
+
 		/* server has sent us an event. process the
 		 * event and reply */
-		
+
 		if (read (client->event_fd, &event, sizeof (event))
 		    != sizeof (event)) {
 			jack_error ("cannot read server event (%s)",
@@ -1746,7 +1746,7 @@ jack_client_process_events (jack_client_t* client)
 
                 if (event.type == PropertyChange) {
                         key = (char *) malloc (event.y.key_size);
-                        if (read (client->event_fd, key, event.y.key_size) != 
+                        if (read (client->event_fd, key, event.y.key_size) !=
                             event.y.key_size) {
                                 jack_error ("cannot read property change key (%s)",
                                             strerror (errno));
@@ -1755,7 +1755,7 @@ jack_client_process_events (jack_client_t* client)
                 }
 
 		status = 0;
-		
+
 		switch (event.type) {
 		case PortRegistered:
 			for (node = client->ports_ext; node; node = jack_slist_next (node)) {
@@ -1768,9 +1768,9 @@ jack_client_process_events (jack_client_t* client)
 				client->port_register
 					(event.x.port_id, TRUE,
 					 client->port_register_arg);
-			} 
+			}
 			break;
-			
+
 		case PortUnregistered:
 			if (control->port_register_cbset) {
 				client->port_register
@@ -1778,15 +1778,15 @@ jack_client_process_events (jack_client_t* client)
 					 client->port_register_arg);
 			}
 			break;
-			
+
 		case ClientRegistered:
 			if (control->client_register_cbset) {
 				client->client_register
 					(event.x.name, TRUE,
 					 client->client_register_arg);
-			} 
+			}
 			break;
-			
+
 		case ClientUnregistered:
 			if (control->client_register_cbset) {
 				client->client_register
@@ -1794,26 +1794,26 @@ jack_client_process_events (jack_client_t* client)
 					 client->client_register_arg);
 			}
 			break;
-			
+
 		case GraphReordered:
 			status = jack_handle_reorder (client, &event);
 			break;
-			
+
 		case PortConnected:
 		case PortDisconnected:
 			status = jack_client_handle_port_connection
 				(client, &event);
 			break;
-			
+
 		case BufferSizeChange:
 			jack_client_fix_port_buffers (client);
 			if (control->bufsize_cbset) {
 				status = client->bufsize
 					(client->engine->buffer_size,
 					 client->bufsize_arg);
-			} 
+			}
 			break;
-			
+
 		case SampleRateChange:
 			if (control->srate_cbset) {
 				status = client->srate
@@ -1821,22 +1821,22 @@ jack_client_process_events (jack_client_t* client)
 					 client->srate_arg);
 			}
 			break;
-			
+
 		case XRun:
 			if (control->xrun_cbset) {
 				status = client->xrun
 					(client->xrun_arg);
 			}
 			break;
-			
+
 		case AttachPortSegment:
 			jack_attach_port_segment (client, event.y.ptid);
 			break;
-			
+
 		case StartFreewheel:
 			jack_start_freewheel (client);
 			break;
-			
+
 		case StopFreewheel:
 			jack_stop_freewheel (client);
 			break;
@@ -1859,10 +1859,10 @@ jack_client_process_events (jack_client_t* client)
                         }
                         break;
 		}
-		
+
 		DEBUG ("client has dealt with the event, writing "
 		       "response on event fd");
-		
+
 		if (write (client->event_fd, &status, sizeof (status))
 		    != sizeof (status)) {
 			jack_error ("cannot send event response to "
@@ -1891,10 +1891,10 @@ jack_wake_next_client (jack_client_t* client)
 			    strerror(errno));
 		return -1;
 	}
-	
+
 	DEBUG ("client sent message to next stage by %" PRIu64 "",
 	       jack_get_microseconds());
-	
+
 	DEBUG("reading cleanup byte from pipe %d\n", client->graph_wait_fd);
 
 	/* "upstream client went away?  readability is checked in
@@ -1921,7 +1921,7 @@ jack_wake_next_client (jack_client_t* client)
 		DEBUG("cleanup byte from pipe %d not available?\n",
 			client->graph_wait_fd);
 	}
-#endif	
+#endif
 	return 0;
 }
 
@@ -1949,11 +1949,11 @@ jack_osx_event_thread_work (void* arg)
         while (1) {
 
 		/* this is OS X - we're only waiting on events */
-		
+
 		DEBUG ("client polling on %s", client->pollmax == 2 ?
 		       "event_fd and graph_wait_fd..." :
 		       "event_fd only");
-		
+
 		while (1) {
 			if (poll (client->pollfd, client->pollmax, 1000) < 0) {
 				if (errno == EINTR) {
@@ -1963,15 +1963,15 @@ jack_osx_event_thread_work (void* arg)
 					    strerror (errno));
 				break;
 			}
-			
+
 			pthread_testcancel();
-			
+
 			if (jack_client_process_events (client)) {
 				DEBUG ("event processing failed\n");
 				break;
 			}
 		}
-		
+
 		if (control->dead || client->pollfd[EVENT_POLL_INDEX].revents & ~POLLIN) {
 			DEBUG ("client appears dead or event pollfd has error status\n");
 			break;
@@ -1997,7 +1997,7 @@ jack_client_core_wait (jack_client_t* client)
 	DEBUG ("client polling on %s", client->pollmax == 2 ?
 	       "event_fd and graph_wait_fd..." :
 	       "event_fd only");
-	
+
 	while (1) {
 		if (poll (client->pollfd, client->pollmax, 1000) < 0) {
 			if (errno == EINTR) {
@@ -2011,27 +2011,27 @@ jack_client_core_wait (jack_client_t* client)
 		pthread_testcancel();
 
 		/* get an accurate timestamp on waking from poll for a
-		 * process() cycle. 
+		 * process() cycle.
 		 */
-		
+
 		if (client->graph_wait_fd >= 0
 		    && client->pollfd[WAIT_POLL_INDEX].revents & POLLIN) {
 			control->awake_at = jack_get_microseconds();
 		}
-		
+
 		DEBUG ("pfd[EVENT].revents = 0x%x pfd[WAIT].revents = 0x%x",
 		       client->pollfd[EVENT_POLL_INDEX].revents,
 		       client->pollfd[WAIT_POLL_INDEX].revents);
-		
+
 		if (client->graph_wait_fd >= 0 &&
 		    (client->pollfd[WAIT_POLL_INDEX].revents & ~POLLIN)) {
-			
+
 			/* our upstream "wait" connection
 			   closed, which either means that
 			   an intermediate client exited, or
 			   jackd exited, or jackd zombified
 			   us.
-			   
+
 			   we can discover the zombification
 			   via client->control->dead, but
 			   the other two possibilities are
@@ -2040,7 +2040,7 @@ jack_client_core_wait (jack_client_t* client)
 			   check what we are connected to,
 			   and act accordingly.
 			*/
-			
+
 			if (client->upstream_is_jackd) {
 				DEBUG ("WE (%s) DIE\n", client->name);
 				return 0;
@@ -2050,12 +2050,12 @@ jack_client_core_wait (jack_client_t* client)
 				 * again until we get a
 				 * GraphReordered event.
 				 */
-				
+
 				client->graph_wait_fd = -1;
 				client->pollmax = 1;
 			}
 		}
-		
+
 		if (jack_client_process_events (client)) {
 			DEBUG ("event processing failed\n");
 			return 0;
@@ -2078,7 +2078,7 @@ jack_client_core_wait (jack_client_t* client)
 
 #endif
 
-static void* 
+static void*
 jack_process_thread_work (void* arg)
 {
 	/* this is the RT process thread used to handle process()
@@ -2104,11 +2104,11 @@ jack_process_thread_work (void* arg)
 
 #ifdef JACK_USE_MACH_THREADS
 	client->rt_thread_ok = TRUE;
-#endif        
+#endif
 
 	if (control->thread_cb_cbset) {
 
-		/* client provided a thread function to run, 
+		/* client provided a thread function to run,
 		   so just do that.
 		*/
 
@@ -2120,29 +2120,29 @@ jack_process_thread_work (void* arg)
 			DEBUG ("calling process thread init callback");
 			client->thread_init (client->thread_init_arg);
 		}
-		
+
 		while (1) {
 			int status;
-			
+
 			if (jack_cycle_wait (client) != client->engine->buffer_size) {
 				break;
 			}
-			
+
 			if (control->process_cbset) {
-				
+
 				/* run process callback, then wait... ad-infinitum */
-				
+
 				DEBUG("client calls process()");
 				status = client->process (client->engine->buffer_size, client->process_arg);
 				control->state = Finished;
 			} else {
 				status = 0;
 			}
-			
-			/* if status was non-zero, this will not return (it will call 
+
+			/* if status was non-zero, this will not return (it will call
 			   jack_client_thread_suicide()
 			*/
-			
+
 			jack_cycle_signal (client, status);
 		}
 	}
@@ -2168,7 +2168,7 @@ jack_nframes_t jack_cycle_wait (jack_client_t* client)
 	jack_client_control_t *control = client->control;
 
 	/* SECTION TWO: WAIT FOR NEXT DATA PROCESSING TIME */
-        
+
 #ifdef JACK_USE_MACH_THREADS
         /* on OS X systems, this thread is running a callback provided
            by the client that has called this function in order to wait
@@ -2185,21 +2185,21 @@ jack_nframes_t jack_cycle_wait (jack_client_t* client)
 		return 0;
 	}
 #endif
-        
+
         /* SECTION THREE: START NEXT DATA PROCESSING TIME */
-        
+
 	/* Time to do data processing */
-        
+
         control->awake_at = jack_get_microseconds();
 	client->control->state = Running;
-	
+
 	/* begin preemption checking */
 	CHECK_PREEMPTION (client->engine, TRUE);
-	
+
 	if (client->control->sync_cb_cbset) {
 		jack_call_sync_client (client);
         }
-        
+
 	return client->engine->buffer_size;
 }
 
@@ -2208,30 +2208,30 @@ void jack_cycle_signal (jack_client_t* client, int status)
 	client->control->last_status = status;
 
         /* SECTION ONE: HOUSEKEEPING/CLEANUP FROM LAST DATA PROCESSING */
-        
+
 	/* housekeeping/cleanup after data processing */
-        
+
 	if (status == 0 && client->control->timebase_cb_cbset) {
 		jack_call_timebase_master (client);
 	}
-	
+
 	/* end preemption checking */
 	CHECK_PREEMPTION (client->engine, FALSE);
-	
+
 	client->control->finished_at = jack_get_microseconds();
         client->control->state = Finished;
-	
-	/* wake the next client in the chain (could be the server), 
+
+	/* wake the next client in the chain (could be the server),
 	   and check if we were killed during the process
 	   cycle.
 	*/
-	
+
 	if (jack_wake_next_client (client)) {
 		DEBUG("client cannot wake next, or is dead\n");
 		jack_client_thread_suicide (client, "graph error");
 		/*NOTREACHED*/
 	}
-        
+
         if (client->control->dead) {
 		jack_client_thread_suicide (client, "zombified");
 		/*NOTREACHED*/
@@ -2258,7 +2258,7 @@ jack_start_thread (jack_client_t *client)
 			jack_error ("cannot lock down memory for RT thread "
 				    "(%s)", strerror (errno));
 		 }
-		 
+
 		 if (client->engine->do_munlock) {
 			 cleanup_mlock ();
 		 }
@@ -2269,7 +2269,7 @@ jack_start_thread (jack_client_t *client)
 /* Stephane Letz : letz@grame.fr
    On MacOSX, the event/callback-handling thread does not need to be real-time.
 */
-	if (jack_client_create_thread (client, 
+	if (jack_client_create_thread (client,
 				       &client->thread,
 				       client->engine->client_priority,
 				       FALSE,
@@ -2311,7 +2311,7 @@ jack_start_thread (jack_client_t *client)
 	return 0;
 }
 
-int 
+int
 jack_activate (jack_client_t *client)
 {
 	jack_request_t req;
@@ -2353,10 +2353,10 @@ jack_activate (jack_client_t *client)
 			   For now, leave the client so that it
 			   still runs, albeit non-realtime.
 			*/
-			
+
 			jack_error ("could not receive realtime capabilities, "
 				    "client will run non-realtime");
-		} 
+		}
 	}
 #endif /* USE_CAPABILITIES */
 
@@ -2364,7 +2364,7 @@ jack_activate (jack_client_t *client)
 
 		pthread_mutex_init (&client_lock, NULL);
 		pthread_cond_init (&client_ready, NULL);
-		
+
 		pthread_mutex_lock (&client_lock);
 
 		if (jack_start_thread (client)) {
@@ -2391,12 +2391,12 @@ jack_activate (jack_client_t *client)
 	return jack_client_deliver_request (client, &req);
 }
 
-static int 
+static int
 jack_deactivate_aux (jack_client_t *client)
 {
 	jack_request_t req;
 	int rc = ESRCH;			/* already shut down */
-	
+
 	if (client && client->control) { /* not shut down? */
 		rc = 0;
 		if (client->control->active) { /* still active? */
@@ -2409,7 +2409,7 @@ jack_deactivate_aux (jack_client_t *client)
 	return rc;
 }
 
-int 
+int
 jack_deactivate (jack_client_t *client)
 {
 	return jack_deactivate_aux(client);
@@ -2429,7 +2429,7 @@ jack_client_close_aux (jack_client_t *client)
 
 	if (client->control->type == ClientExternal) {
 
-#if JACK_USE_MACH_THREADS 
+#if JACK_USE_MACH_THREADS
 		if (client->rt_thread_ok) {
 			// MacOSX pthread_cancel not implemented in
 			// Darwin 5.5, 6.4
@@ -2438,11 +2438,11 @@ jack_client_close_aux (jack_client_t *client)
 			thread_terminate (machThread);
 		}
 #endif
-	
+
 		/* stop the thread that communicates with the jack
-		 * server, only if it was actually running 
+		 * server, only if it was actually running
 		 */
-		
+
 		if (client->thread_ok){
 			pthread_cancel (client->thread);
 			pthread_join (client->thread, &status);
@@ -2470,12 +2470,12 @@ jack_client_close_aux (jack_client_t *client)
 		if (client->graph_wait_fd >= 0) {
 			close (client->graph_wait_fd);
 		}
-		
+
 		if (client->graph_next_fd >= 0) {
 			close (client->graph_next_fd);
 		}
-#endif		
-		
+#endif
+
 		close (client->event_fd);
 
 		if (shutdown (client->request_fd, SHUT_RDWR)) {
@@ -2504,15 +2504,15 @@ int
 jack_client_close (jack_client_t *client)
 {
 	return jack_client_close_aux(client);
-}	
+}
 
-int 
+int
 jack_is_realtime (jack_client_t *client)
 {
 	return client->engine->real_time;
 }
 
-jack_nframes_t 
+jack_nframes_t
 jack_get_buffer_size (jack_client_t *client)
 {
 	return client->engine->buffer_size;
@@ -2540,7 +2540,7 @@ jack_set_buffer_size (jack_client_t *client, jack_nframes_t nframes)
 #endif /* DO_BUFFER_RESIZE */
 }
 
-int 
+int
 jack_connect (jack_client_t *client, const char *source_port,
 	      const char *destination_port)
 {
@@ -2581,7 +2581,7 @@ jack_port_disconnect (jack_client_t *client, jack_port_t *port)
 	return jack_client_deliver_request (client, &req);
 }
 
-int 
+int
 jack_disconnect (jack_client_t *client, const char *source_port,
 		 const char *destination_port)
 {
@@ -2596,7 +2596,7 @@ jack_disconnect (jack_client_t *client, const char *source_port,
 	snprintf (req.x.connect.destination_port,
 		  sizeof (req.x.connect.destination_port),
 		  "%s", destination_port);
-	
+
 	return jack_client_deliver_request (client, &req);
 }
 
@@ -2612,7 +2612,7 @@ jack_set_info_function (void (*func) (const char *))
 	jack_info_callback = func;
 }
 
-int 
+int
 jack_set_graph_order_callback (jack_client_t *client,
 			       JackGraphOrderCallback callback, void *arg)
 {
@@ -2626,7 +2626,7 @@ jack_set_graph_order_callback (jack_client_t *client,
 	return 0;
 }
 
-int 
+int
 jack_set_latency_callback (jack_client_t *client,
 			       JackLatencyCallback callback, void *arg)
 {
@@ -2651,7 +2651,7 @@ int jack_set_xrun_callback (jack_client_t *client,
 	client->xrun = callback;
 	client->xrun_arg = arg;
 	client->control->xrun_cbset = (callback != NULL);
-	return 0;       
+	return 0;
 }
 
 int
@@ -2663,12 +2663,12 @@ jack_set_process_callback (jack_client_t *client,
 		jack_error ("You cannot set callbacks on an active client.");
 		return -1;
 	}
-	
+
 	if (client->control->thread_cb_cbset) {
 		jack_error ("A thread callback has already been setup, both models cannot be used at the same time!");
 		return -1;
 	}
-	
+
 	client->process_arg = arg;
 	client->process = callback;
 	client->control->process_cbset = (callback != NULL);
@@ -2771,7 +2771,7 @@ jack_set_process_thread(jack_client_t* client, JackThreadCallback callback, void
 		jack_error ("You cannot set callbacks on an active client.");
 		return -1;
 	}
-	
+
 	if (client->control->process_cbset) {
 		jack_error ("A process callback has already been setup, both models cannot be used at the same time!");
 		return -1;
@@ -2819,9 +2819,9 @@ jack_on_info_shutdown (jack_client_t *client, void (*function)(jack_status_t, co
 
 char *
 jack_get_client_name_by_uuid (jack_client_t *client, const char *uuid_str)
-{ 
+{
 	jack_request_t request;
-        
+
         VALGRIND_MEMSET (&request, 0, sizeof (request));
 
         if (jack_uuid_parse (uuid_str, &request.x.client_id) != 0) {
@@ -2829,7 +2829,7 @@ jack_get_client_name_by_uuid (jack_client_t *client, const char *uuid_str)
         }
 
 	request.type = GetClientByUUID;
-	if( jack_client_deliver_request (client, &request)) 
+	if( jack_client_deliver_request (client, &request))
 		return NULL;
 
 	return strdup  (request.x.port_info.name);
@@ -2859,7 +2859,7 @@ jack_get_uuid_for_client_name (jack_client_t *client, const char *client_name)
 
 char *
 jack_client_get_uuid (jack_client_t *client)
-{ 
+{
 	char retval[37];
         jack_uuid_unparse (client->control->uuid, retval);
 	return strdup (retval);
@@ -2867,7 +2867,7 @@ jack_client_get_uuid (jack_client_t *client)
 
 int
 jack_reserve_client_name (jack_client_t *client, const char *name, const char *uuid_str)
-{ 
+{
 	jack_request_t request;
 
         VALGRIND_MEMSET (&request, 0, sizeof (request));
@@ -2931,7 +2931,7 @@ jack_get_ports (jack_client_t *client,
 			if (regexec (&port_regex, psp[i].name, 0, NULL, 0)) {
 				matching = 0;
 			}
-		} 
+		}
 
 		if (matching && type_name_pattern && type_name_pattern[0]) {
 			jack_port_type_id_t ptid = psp[i].ptype_id;
@@ -2940,8 +2940,8 @@ jack_get_ports (jack_client_t *client,
 				     0, NULL, 0)) {
 				matching = 0;
 			}
-		} 
-		
+		}
+
 		if (matching) {
 			matching_ports[match_cnt++] = psp[i].name;
 		}
@@ -2993,7 +2993,7 @@ jack_client_thread_id (jack_client_t *client)
         if (client->control->type != ClientExternal) {
                 /* Internal and driver clients run in ... ??? */
                 return 0;
-        } 
+        }
 
 	return client->thread_id;
 }

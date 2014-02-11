@@ -8,9 +8,9 @@ plugindir = $(ADDON_DIR)
 plugin_LTLIBRARIES = jack_iio.la
 
 jack_iio_la_LDFLAGS = -module -avoid-version
-jack_iio_la_SOURCES = iio_driver.C
+#jack_iio_la_SOURCES = iio_driver.C
+jack_iio_la_SOURCES = iio_driver_dummy.C # this is used to test the framework.
 jack_iio_la_LIBADD = $(top_builddir)/jackd/libjackserver.la #$(GTKIOSTREAM_LIBS) $(EIGEN_LIBS)
-#jack_portaudio_la_LIBADD = $(PA_LIBS)
 
 noinst_HEADERS = iio_driver.h
 
