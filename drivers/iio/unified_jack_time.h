@@ -91,6 +91,7 @@ inline void zeroTime(timeType *ts1){
 }
 
 inline int nanoSleep(timeType nextTime, float *delayed_usecs){
+        //cout<<"nanoSleep timespec"<<endl;
 		if(clock_nanosleep(CLOCK_REALTIME, TIMER_ABSTIME, &nextTime, NULL)) {
 			jack_error("error while sleeping");
 			return -1;
@@ -131,6 +132,7 @@ inline void zeroTime(timeType *t1){
 }
 
 inline void nanoSleep(timeType nextTime, float *delayed_usecs, int *status){
+        //cout<<"nanoSleep jack_time_t"<<endl;
         timeType now; getNow(&now);
 		jack_time_t wait = nextTime - now;
 		struct timespec ts = { .tv_sec = wait / 1000000, .tv_nsec = (wait % 1000000) * 1000 };

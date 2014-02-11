@@ -28,12 +28,10 @@ Date: 2014.01.13
 #define DEBUG_LOCAL_OUTPUT
 //#define DEBUG_OUTPUT
 
-#include <values.h>
-
-#include <iostream>
 #include <IIO/IIOMMap.H>
-#include <inttypes.h>
+
 #define __STDC_FORMAT_MACROS
+#include <values.h>
 
 extern "C" {
 #include "iio_driver.h"
@@ -166,11 +164,7 @@ static int iio_driver_start (iio_driver_t *driver) {
         return ret;
     }
 
-#ifdef HAVE_CLOCK_GETTIME
-    driver->next_wakeup.tv_sec = 0;
-#else
-    driver->next_time = 0;
-#endif
+	zeroTime(&NEXT_TIME); // driver->next_wakeup.tv_sec = 0; which is the same as driver->next_time = 0;
     return 0;
 }
 
@@ -198,9 +192,6 @@ static int iio_driver_read(iio_driver_t *driver, jack_nframes_t nframes) {
         int ret=iio->read(nframes, *data);
         if (ret!=NO_ERROR)
             return -1;
-//        for (jack_nframes_t i=0; i<nframes; i++){
-//            cout<<(float)(*data)(i,0)<<endl;
-//        cout<<endl;
 
         // write to the connected capture ports ...
         JSList *node = (JSList *)driver->capture_ports;
@@ -211,8 +202,8 @@ static int iio_driver_read(iio_driver_t *driver, jack_nframes_t nframes) {
             if (!jack_port_connected (port)) /* no-copy optimization */
                 continue;
 
-            int col=chn/devChCnt;
-            int rowOffset=chn%devChCnt;
+//            int col=chn/devChCnt;
+//            int rowOffset=chn%devChCnt;
 
             jack_default_audio_sample_t *buf = static_cast<jack_default_audio_sample_t *>(jack_port_get_buffer (port, nframes));
             for (jack_nframes_t i=0; i<nframes; i++){
@@ -255,48 +246,54 @@ static int iio_driver_null_cycle (iio_driver_t *driver, jack_nframes_t nframes) 
 }
 
 /** The driver_wait function to work out if we have used more time then available to process one cycle.
+    This is written once for either timespec (HAVE_CLOCK_GETTIME) or jack_time_t, see the unified_jack_time.h file.
+
+    This function manages the time now and the next expected time to return. The return happens once per block of time (period_size).
+
+    The general idea of *_driver_wait is to do the following :
+    a] Mark the time now if this is the first time through or if an overrun previously happened.
+    b] If an overrun is detected (we have exceeded the maximum time held in our audio buffers) then indicate.
+    c] If we are late but not dangerously, then keep going.
+    d] If we are early then sleep a little to allow clients enough time to process.
+
+    The effect of 'c]' and 'd]' is to create time pumping. Theoretically we will always be either a little over or under time, and it will be difficult to match audio block
+    time exactly. This doesn't matter if the time pumping is a small fraction of our block time. This means that the clients will have slightly more or less then audio block
+    time to process.
 */
 static jack_nframes_t iio_driver_wait(iio_driver_t *driver, int extra_fd, int *status, float *delayed_usecs) {
-    Debugger<<"iio_driver_wait\n";
-    ELAPSED_TIME(&(driver->debug_last_time), driver->engine->get_microseconds())
-    //float maxDelayTime=(IIO_SAFETY_FACTOR*driver->maxDelayUSecs); // this driver can handle this much delay between reads.
-    float maxDelayTime=driver->maxDelayUSecs; // this driver can handle this much delay between reads.
-    //Debugger<<"maxDelayTime "<<maxDelayTime<<endl;
+	jack_nframes_t nframes = driver->period_size;
+    //Debugger<<"iio_driver_wait\n";
+    *delayed_usecs = 0;
     *status = 0;
 
-    jack_time_t now = driver->engine->get_microseconds();
+    timeType now; getNow(&now); // the time right now
 
-    bool xrun=false;
-    if (driver->next_time < now) {
-        //DebuggerLocal<<"iio_driver_wait NOT good\n";
-        if (driver->next_time == 0) { /* first time through */
+	if (compareTimesLt(NEXT_TIME, now)) { // NEXT_TIME < now  ... this is a problem as the next time should be >= now
+        //printf("iio_driver_wait NOT good\n");
+        if (compareTimeZero(NEXT_TIME)) { /* first time through */
             //DebuggerLocal<<"iio_driver_first time - OK\n";
-            driver->next_time = now + driver->wait_time;
-            driver->last_xrun_time=now;
-        } else if ((now - driver->last_wait_ust) > maxDelayTime) { /* xrun */
-            ////Debugger<<"driver->last_wait_ust "<<driver->last_wait_ust<<" now "<<now<<endl;
-            jack_error("**** iio: xrun of %ju usec", (uintmax_t)now - driver->next_time);
-            //cout<<"**** iio: xrun of "<<((uintmax_t)now - driver->next_time)<<"u usec last xrun was "<<now-driver->last_xrun_time<<"us ago."<<endl;
-            driver->last_xrun_time=now;
-            driver->next_time = now + driver->wait_time;
-            *status=0; // xruns are fatal - but switching to non-fatal during development
-            xrun=true;
+            //printf("first time through\n\n\n");
+			getNow(&NEXT_TIME); // reset the next time to now, will be incremented later
+        } else if (timeDiffUsComp(now, driver->next_wakeup, driver->maxDelayUSecs)) { /* xrun = (now - NEXT_TIME) > maxDelayTime */
+            ////Debugger<<"NEXT_TIME "<<NEXT_TIME<<" now "<<now<<endl;
+            jack_error("**** iio: xrun of %ju usec", timeDiffUs(now, NEXT_TIME));
+            nframes=0; // indicated the xrun
+            zeroTime(&NEXT_TIME);  // reset the next time to zero because of the overrun, we don't know when to start again.
             //*status=-1; // xruns are fatal
         } else /* late, but handled by our "buffer" */
-            driver->next_time += driver->wait_time;
-    } else {
-        //Debugger<<"iio_driver_wait all good\n";
-        driver->next_time += driver->wait_time;
+            ;
+	} else { // now sleep to ensure we give the clients enough time to process
+        *status = nanoSleep(NEXT_TIME, delayed_usecs);
+        //printf("iio_driver_wait all good\n");
     }
 
-    driver->last_wait_ust = driver->engine->get_microseconds(); // remember the time now
-    driver->engine->transport_cycle_start (driver->engine, driver->last_wait_ust);
+    if (nframes!=0) // if there is no xrun, then indicate the next expected time to land in this funciton.
+        NEXT_TIME=addTimes(NEXT_TIME, driver->wait_time);
 
-    ////Debugger<<"difference = "<<driver->last_wait_ust-now<<"\n";
+	driver->last_wait_ust = driver->engine->get_microseconds ();
+	driver->engine->transport_cycle_start (driver->engine, driver->last_wait_ust);
 
-    *delayed_usecs = 0;
-    if (xrun) return 0;
-    return driver->period_size;
+	return nframes;
 }
 
 static int iio_driver_run_cycle (iio_driver_t *driver) {

@@ -36,10 +36,10 @@ Date: 2014.01.13
 #include <math.h>
 #include <stdio.h>
 
-//extern "C" {
+extern "C" {
 #include "iio_driver.h"
 #include "engine.h"
-//}
+}
 
 
 #define IIO_DEFAULT_CHIP "AD7476A" ///< The default IIO recording chip to look for.

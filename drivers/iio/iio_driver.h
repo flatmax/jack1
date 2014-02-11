@@ -24,6 +24,7 @@
 #ifndef __JACK_IIO_DRIVER_H__
 #define __JACK_IIO_DRIVER_H__
 
+#define __STDC_FORMAT_MACROS
 #include <jack/types.h>
 #include <jack/jack.h>
 
@@ -54,6 +55,8 @@ typedef struct _iio_driver {
     jack_nframes_t  sample_rate; ///< The sample rate of the IIO chip.
     unsigned long   wait_time; ///< The time to wait between calls.
     timeType NEXT_TIME_NAME; ///< The time type, either timespec or jack_time_t
+
+    jack_time_t debug_last_time; ///< Used for marking time passing during debugging
 
     void *IIO_devices; ///< The IIO C++ class maintaining all devices with a particular chip name.
     float maxDelayUSecs; ///< The maximum number of micro seconds the buffer can hold
