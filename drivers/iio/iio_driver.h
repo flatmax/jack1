@@ -29,39 +29,31 @@
 
 #include "driver.h"
 
+#include <jack/jslist.h>
+
+#include <config.h>
+
+#include "unified_jack_time.h"
+
+typedef struct _iio_driver iio_driver_t;
+
 /** The structure defining all of the IIO related variables.
 */
 typedef struct _iio_driver {
     JACK_DRIVER_NT_DECL;
-
 	jack_nframes_t period_size;
 	unsigned int nperiods;
 	unsigned int capture_channels;
 	unsigned int playback_channels;
 
-//	char *indev;
-//	char *outdev;
-//	int infd;
-//	int outfd;
-//	int format;
-//	int ignorehwbuf;
-//	int trigger;
-//
 	JSList *capture_ports;
 	JSList *playback_ports;
-//
-//	jack_engine_t *engine;
+
 	jack_client_t *client;
 
     jack_nframes_t  sample_rate; ///< The sample rate of the IIO chip.
     unsigned long   wait_time; ///< The time to wait between calls.
-#ifdef HAVE_CLOCK_GETTIME
-    struct timespec next_wakeup;
-#else
-    jack_time_t     next_time;
-    jack_time_t     last_xrun_time;
-    jack_time_t     debug_last_time;
-#endif
+    timeType NEXT_TIME_NAME; ///< The time type, either timespec or jack_time_t
 
     void *IIO_devices; ///< The IIO C++ class maintaining all devices with a particular chip name.
     float maxDelayUSecs; ///< The maximum number of micro seconds the buffer can hold
