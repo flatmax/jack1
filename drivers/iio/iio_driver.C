@@ -50,7 +50,7 @@ extern "C" {
 
 static int iio_driver_attach (iio_driver_t *driver, jack_engine_t *engine) {
     //DebuggerLocal<<"iio_driver_attach\n";
-    ELAPSED_TIME(&(driver->debug_last_time), driver->engine->get_microseconds())
+    //ELAPSED_TIME(&(driver->debug_last_time), driver->engine->get_microseconds())
 
     // open the IIO subsystem
     IIOMMap *iio = static_cast<IIOMMap *>(driver->IIO_devices);
@@ -125,7 +125,7 @@ static int iio_driver_attach (iio_driver_t *driver, jack_engine_t *engine) {
 
 static int iio_driver_detach (iio_driver_t *driver, jack_engine_t *engine) {
     DebuggerLocal<<"iio_driver_detach\n";
-    ELAPSED_TIME(&(driver->debug_last_time), driver->engine->get_microseconds())
+    //ELAPSED_TIME(&(driver->debug_last_time), driver->engine->get_microseconds())
 
     IIOMMap *iio = static_cast<IIOMMap *>(driver->IIO_devices);
     iio->enable(false); // stop the DMA
@@ -155,7 +155,7 @@ static int iio_driver_detach (iio_driver_t *driver, jack_engine_t *engine) {
 
 static int iio_driver_start (iio_driver_t *driver) {
     DebuggerLocal<<"iio_driver_start::   enabling IIO : enable(true)\n";
-    ELAPSED_TIME(&(driver->debug_last_time), driver->engine->get_microseconds())
+    //ELAPSED_TIME(&(driver->debug_last_time), driver->engine->get_microseconds())
 
     IIOMMap *iio = static_cast<IIOMMap *>(driver->IIO_devices);
     int ret;
@@ -170,7 +170,7 @@ static int iio_driver_start (iio_driver_t *driver) {
 
 static int iio_driver_stop (iio_driver_t *driver) {
     DebuggerLocal<<"iio_driver_start:: disabling IIO : enable(false)"<<endl;
-    ELAPSED_TIME(&(driver->debug_last_time), driver->engine->get_microseconds())
+    //ELAPSED_TIME(&(driver->debug_last_time), driver->engine->get_microseconds())
 
     IIOMMap *iio = static_cast<IIOMMap *>(driver->IIO_devices);
     iio->enable(false); // stop the DMA
@@ -179,7 +179,7 @@ static int iio_driver_stop (iio_driver_t *driver) {
 
 static int iio_driver_read(iio_driver_t *driver, jack_nframes_t nframes) {
     Debugger<<"iio_driver_read\n";
-    ELAPSED_TIME(&(driver->debug_last_time), driver->engine->get_microseconds())
+    //ELAPSED_TIME(&(driver->debug_last_time), driver->engine->get_microseconds())
 
     if (nframes > 0) {
         ////Debugger<<"iio_driver_read nframes = "<<nframes<<"\n";
@@ -227,7 +227,7 @@ static int iio_driver_write (iio_driver_t *driver, jack_nframes_t nframes) {
 
 static int iio_driver_null_cycle (iio_driver_t *driver, jack_nframes_t nframes) {
     //Debugger<<"iio_driver_null_cycle\n";
-    ELAPSED_TIME(&(driver->debug_last_time), driver->engine->get_microseconds())
+    //ELAPSED_TIME(&(driver->debug_last_time), driver->engine->get_microseconds())
 
     if (nframes>0) {
         IIOMMap *iio = static_cast<IIOMMap *>(driver->IIO_devices);
@@ -298,7 +298,7 @@ static jack_nframes_t iio_driver_wait(iio_driver_t *driver, int extra_fd, int *s
 
 static int iio_driver_run_cycle (iio_driver_t *driver) {
     //Debugger<<"iio_driver_run_cycle\n";
-    ELAPSED_TIME(&(driver->debug_last_time), driver->engine->get_microseconds())
+    //ELAPSED_TIME(&(driver->debug_last_time), driver->engine->get_microseconds())
 
     int wait_status;
     float delayed_usecs;
@@ -336,7 +336,7 @@ jack_time_t getUSecs(jack_nframes_t nframes, jack_nframes_t fs) {
 */
 static int iio_driver_bufsize(iio_driver_t *driver, jack_nframes_t nframes) {
     //DebuggerLocal<<"iio_driver_bufsize"<<endl;
-    ELAPSED_TIME(&(driver->debug_last_time), driver->engine->get_microseconds())
+    //ELAPSED_TIME(&(driver->debug_last_time), driver->engine->get_microseconds())
 
     IIOMMap *iio = static_cast<IIOMMap *>(driver->IIO_devices);
 //    int newDMABufSize=iio->setChannelBufferCnt(nframes*2); // ensure we have a periods head room
@@ -447,7 +447,7 @@ static int iio_driver_bufsize(iio_driver_t *driver, jack_nframes_t nframes) {
 */
 static void iio_driver_delete(iio_driver_t * driver) {
     DebuggerLocal<<"iio_driver_delete"<<endl;
-    ELAPSED_TIME(&(driver->debug_last_time), driver->engine->get_microseconds())
+    //ELAPSED_TIME(&(driver->debug_last_time), driver->engine->get_microseconds())
 
     IIOMMap *iio = static_cast<IIOMMap *>(driver->IIO_devices);
     if (iio)

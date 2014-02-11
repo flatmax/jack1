@@ -28,23 +28,27 @@ Date: 2014.01.13
 #define DEBUG_LOCAL_OUTPUT
 //#define DEBUG_OUTPUT
 
+#include <IIO/IIOMMap.H>
+
+#define __STDC_FORMAT_MACROS
 #include <values.h>
 
-#include <stdbool.h>
-#include <string.h>
-#include <errno.h>
-#include <math.h>
-#include <stdio.h>
+//#include <stdbool.h>
+//#include <string.h>
+//#include <errno.h>
+//#include <math.h>
+//#include <stdio.h>
 
 extern "C" {
 #include "iio_driver.h"
 #include "engine.h"
 }
 
+#define ELAPSED_TIME(last_time, this_time) {Debugger<<"time since last time = "<<(uintmax_t)(this_time-*last_time)<<'\n'; *last_time = this_time;}
 
 #define IIO_DEFAULT_CHIP "AD7476A" ///< The default IIO recording chip to look for.
-//#define IIO_DEFAULT_READ_FS 1.e6 ///< The default IIO sample rate for the default chip.
-#define IIO_DEFAULT_READ_FS 48.e3 ///< The default IIO sample rate for the default chip.
+#define IIO_DEFAULT_READ_FS 1.e6 ///< The default IIO sample rate for the default chip.
+//#define IIO_DEFAULT_READ_FS 48.e3 ///< The default IIO sample rate for the default chip.
 #define IIO_DEFAULT_PERIOD_SIZE 2048 ///< The default period size is in the ms range
 #define IIO_DEFAULT_PERIOD_COUNT 2 ///< The default number of periods
 #define IIO_DEFAULT_CAPUTURE_PORT_COUNT MAXINT ///< The default number of capture ports is exceedingly big, trimmed down to a realistic size in driver_initialize
@@ -372,7 +376,8 @@ jack_driver_t *driver_initialize (jack_client_t *client, const JSList * params) 
         }
 
         driver->period_usecs = driver->wait_time = getUSecs(driver->period_size, driver->sample_rate);
-        driver->maxDelayUSecs=4000; // the mmap max delay is currently unknown
+        driver->maxDelayUSecs=driver->period_usecs*driver->nperiods; // the mmap max delay is currently unknown
+        cout<<"max delay = "<<driver->maxDelayUSecs<<" us"<<endl;
         driver->capture_channels=4;
         jack_info("created DUMMY iio driver ... dummy_iio|%" PRIu32 "|%" PRIu32 "|%lu|%u|%u", driver->sample_rate, driver->period_size, driver->wait_time, driver->capture_channels, driver->playback_channels);
         return (jack_driver_t *) driver;
